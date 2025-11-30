@@ -15,5 +15,8 @@ class Sparepart extends Model
         'harga_modal',
         'satuan',
         'stock_awal',
+        'stok_masuk',
+        'stok_keluar',
+        'stok_akhir',
     ];
 }

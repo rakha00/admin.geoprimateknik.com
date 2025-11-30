@@ -54,14 +54,16 @@ class SparepartResource extends Resource
                 ->money('IDR', true),
             Tables\Columns\TextColumn::make('satuan'),
             Tables\Columns\TextColumn::make('stock_awal'),
+            Tables\Columns\TextColumn::make('stok_masuk')->label('Stok Masuk'),
+            Tables\Columns\TextColumn::make('stok_akhir')->label('Stok Akhir'),
         ])
-        ->actions([
-            Tables\Actions\EditAction::make(),
-            Tables\Actions\DeleteAction::make(),
-        ])
-        ->bulkActions([
-            Tables\Actions\DeleteBulkAction::make(),
-        ]);
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make(),
+            ]);
     }
 
     public static function getPages(): array

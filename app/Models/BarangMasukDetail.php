@@ -9,6 +9,7 @@ class BarangMasukDetail extends Model
     protected $fillable = [
         'barang_masuk_id',
         'unit_ac_id',
+        'sparepart_id',
         'sku',
         'nama_unit',
         'harga_jual',
@@ -19,7 +20,7 @@ class BarangMasukDetail extends Model
 
     protected static function booted()
     {
-        static::creating(function ($detail) {
+        static::saving(function ($detail) {
             if ($detail->unit_ac_id) {
                 $unit = \App\Models\UnitAc::find($detail->unit_ac_id);
                 if ($unit) {
@@ -27,16 +28,25 @@ class BarangMasukDetail extends Model
                     $detail->nama_unit = $unit->nama_unit;
                     $detail->harga_modal = $unit->harga_modal;
                 }
+            } elseif ($detail->sparepart_id) {
+                $sparepart = \App\Models\Sparepart::find($detail->sparepart_id);
+                if ($sparepart) {
+                    $detail->sku = $sparepart->sku;
+                    $detail->nama_unit = $sparepart->nama_sparepart;
+                    $detail->harga_modal = $sparepart->harga_modal;
+                }
             }
         });
 
-        // trigger otomatis ke utang
+        // trigger otomatis ke utang dan update stock sparepart
         static::saved(function ($detail) {
             $detail->syncUtang();
+            $detail->updateSparepartStock();
         });
 
         static::deleted(function ($detail) {
             $detail->syncUtang();
+            $detail->updateSparepartStock();
         });
     }
 
@@ -50,10 +60,41 @@ class BarangMasukDetail extends Model
         return $this->belongsTo(UnitAc::class);
     }
 
+    public function sparepart()
+    {
+        return $this->belongsTo(Sparepart::class);
+    }
+
+    protected function updateSparepartStock()
+    {
+        // Handle current sparepart
+        if ($this->sparepart_id) {
+            $this->recalculateStock($this->sparepart_id);
+        }
+
+        // Handle old sparepart if changed
+        $originalId = $this->getOriginal('sparepart_id');
+        if ($originalId && $originalId != $this->sparepart_id) {
+            $this->recalculateStock($originalId);
+        }
+    }
+
+    protected function recalculateStock($sparepartId)
+    {
+        $sparepart = \App\Models\Sparepart::find($sparepartId);
+        if ($sparepart) {
+            $stokMasuk = \App\Models\BarangMasukDetail::where('sparepart_id', $sparepartId)->sum('jumlah_barang_masuk');
+            $sparepart->stok_masuk = $stokMasuk;
+            $sparepart->stok_akhir = $sparepart->stock_awal + $stokMasuk - $sparepart->stok_keluar;
+            $sparepart->save();
+        }
+    }
+
     protected function syncUtang()
     {
         $barangMasuk = $this->barangMasuk;
-        if (! $barangMasuk) return;
+        if (!$barangMasuk)
+            return;
 
         $totalHargaModal = $barangMasuk->barangMasukDetails->sum(function ($d) {
             $harga = $d->harga_modal ?? 0;
