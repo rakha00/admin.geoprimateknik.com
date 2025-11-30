@@ -28,7 +28,7 @@ class PajakDetailRelationManager extends RelationManager
                 ->live()
                 ->required()
                 ->afterStateUpdated(function ($state, Set $set) {
-                    if (! $state) {
+                    if (!$state) {
                         $set('nama_unit', '');
                         $set('unit_ac_id', null);
                         $set('harga_patokan', 0);
@@ -36,8 +36,8 @@ class PajakDetailRelationManager extends RelationManager
                     }
 
                     $unit = UnitAc::where('sku', $state)->first();
-                    $set('nama_unit',   $unit->nama_unit ?? '');
-                    $set('unit_ac_id',  $unit->id ?? null);
+                    $set('nama_unit', $unit->nama_unit ?? '');
+                    $set('unit_ac_id', $unit->id ?? null);
                     // harga_patokan hanya tampilan, ambil dari field referensi (misal harga_modal di UnitAc)
                     $set('harga_patokan', $unit->harga_modal ?? 0);
                 }),
@@ -82,6 +82,7 @@ class PajakDetailRelationManager extends RelationManager
             Forms\Components\Hidden::make('total_modal'),
             Forms\Components\Hidden::make('total_harga_jual'),
             Forms\Components\Hidden::make('keuntungan'),
+            Forms\Components\Hidden::make('unit_ac_id'),
 
             Textarea::make('remarks')
                 ->label('Keterangan')
@@ -108,8 +109,8 @@ class PajakDetailRelationManager extends RelationManager
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $hargaModal = (float) ($data['harga_modal'] ?? 0);
-        $hargaJual  = (float) ($data['harga_jual'] ?? 0);
-        $jumlah     = (int)   ($data['jumlah_keluar'] ?? 0);
+        $hargaJual = (float) ($data['harga_jual'] ?? 0);
+        $jumlah = (int) ($data['jumlah_keluar'] ?? 0);
 
         $data['total_modal'] = $hargaModal * $jumlah;
         $data['total_harga_jual'] = $hargaJual * $jumlah;
@@ -133,25 +134,25 @@ class PajakDetailRelationManager extends RelationManager
                 TextColumn::make('jumlah_keluar')->label('Qty')->numeric(),
                 TextColumn::make('harga_modal')
                     ->label('Harga Modal')
-                    ->formatStateUsing(fn ($state) => number_format($state ?? 0, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => number_format($state ?? 0, 0, ',', '.')),
 
                 TextColumn::make('harga_jual')
                     ->label('Harga Jual')
-                    ->formatStateUsing(fn ($state) => number_format($state ?? 0, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => number_format($state ?? 0, 0, ',', '.')),
 
                 TextColumn::make('total_modal')
                     ->label('Total Modal')
-                    ->getStateUsing(fn ($record) => $record->total_modal ?? (($record->harga_modal ?? 0) * ($record->jumlah_keluar ?? 0)))
-                    ->formatStateUsing(fn ($state) => number_format($state ?? 0, 0, ',', '.')),
+                    ->getStateUsing(fn($record) => $record->total_modal ?? (($record->harga_modal ?? 0) * ($record->jumlah_keluar ?? 0)))
+                    ->formatStateUsing(fn($state) => number_format($state ?? 0, 0, ',', '.')),
                 TextColumn::make('total_harga_jual')
                     ->label('Total Jual')
-                    ->getStateUsing(fn ($record) => $record->total_harga_jual ?? (($record->harga_jual ?? 0) * ($record->jumlah_keluar ?? 0)))
-                    ->formatStateUsing(fn ($state) => number_format($state ?? 0, 0, ',', '.')),
+                    ->getStateUsing(fn($record) => $record->total_harga_jual ?? (($record->harga_jual ?? 0) * ($record->jumlah_keluar ?? 0)))
+                    ->formatStateUsing(fn($state) => number_format($state ?? 0, 0, ',', '.')),
 
                 TextColumn::make('keuntungan')
                     ->label('Keuntungan')
-                    ->getStateUsing(fn ($record) => ($record->total_harga_jual ?? (($record->harga_jual ?? 0) * ($record->jumlah_keluar ?? 0))) - ($record->total_modal ?? (($record->harga_modal ?? 0) * ($record->jumlah_keluar ?? 0))))
-                    ->formatStateUsing(fn ($state) => number_format($state ?? 0, 0, ',', '.')),
+                    ->getStateUsing(fn($record) => ($record->total_harga_jual ?? (($record->harga_jual ?? 0) * ($record->jumlah_keluar ?? 0))) - ($record->total_modal ?? (($record->harga_modal ?? 0) * ($record->jumlah_keluar ?? 0))))
+                    ->formatStateUsing(fn($state) => number_format($state ?? 0, 0, ',', '.')),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),

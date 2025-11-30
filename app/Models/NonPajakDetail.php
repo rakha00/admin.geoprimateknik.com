@@ -22,14 +22,22 @@ class NonPajakDetail extends Model
         'remarks',
     ];
 
-protected static function booted()
+    protected static function booted()
     {
         static::saved(function ($detail) {
             $detail->syncPiutang();
+            if ($detail->unit_ac_id) {
+                $unit = \App\Models\UnitAc::find($detail->unit_ac_id);
+                $unit?->recalculateStock();
+            }
         });
 
         static::deleted(function ($detail) {
             $detail->syncPiutang();
+            if ($detail->unit_ac_id) {
+                $unit = \App\Models\UnitAc::find($detail->unit_ac_id);
+                $unit?->recalculateStock();
+            }
         });
     }
 
@@ -41,14 +49,15 @@ protected static function booted()
     protected function syncPiutang()
     {
         $nonPajak = $this->nonPajak;
-        if (! $nonPajak) return;
+        if (!$nonPajak)
+            return;
 
         $totalHargaJual = $nonPajak->details()->sum('total_harga_jual');
 
         \App\Models\Piutang::updateOrCreate(
             ['non_pajak_id' => $nonPajak->id], // pakai non_pajak_id
             [
-                'tanggal' => $nonPajak->tanggal,
+                'due_date' => $nonPajak->tanggal,
                 'total_harga_modal' => $totalHargaJual,
                 'status_pembayaran' => 'belum lunas',
                 'keterangan' => 'Non Pajak',

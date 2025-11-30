@@ -22,14 +22,22 @@ class PajakDetail extends Model
         'remarks',
     ];
 
-protected static function booted()
+    protected static function booted()
     {
         static::saved(function ($detail) {
             $detail->syncPiutang();
+            if ($detail->unit_ac_id) {
+                $unit = \App\Models\UnitAc::find($detail->unit_ac_id);
+                $unit?->recalculateStock();
+            }
         });
 
         static::deleted(function ($detail) {
             $detail->syncPiutang();
+            if ($detail->unit_ac_id) {
+                $unit = \App\Models\UnitAc::find($detail->unit_ac_id);
+                $unit?->recalculateStock();
+            }
         });
     }
 
@@ -38,23 +46,23 @@ protected static function booted()
         return $this->belongsTo(Pajak::class);
     }
 
-protected function syncPiutang()
-{
-    $pajak = $this->pajak;
-    if (! $pajak) return;
+    protected function syncPiutang()
+    {
+        $pajak = $this->pajak;
+        if (!$pajak)
+            return;
 
-    $totalHargaJual = $pajak->details()->sum('total_harga_jual');
+        $totalHargaJual = $pajak->details()->sum('total_harga_jual');
 
-    \App\Models\Piutang::updateOrCreate(
-        ['pajak_id' => $pajak->id], // pakai pajak_id, bukan no_invoice
-        [
-            'tanggal' => $pajak->tanggal,
-            'total_harga_modal' => $totalHargaJual,
-            'status_pembayaran' => 'belum lunas',
-            'keterangan' => 'Pajak',
-        ]
-    );
+        \App\Models\Piutang::updateOrCreate(
+            ['pajak_id' => $pajak->id], // pakai pajak_id, bukan no_invoice
+            [
+                'due_date' => $pajak->tanggal,
+                'total_harga_modal' => $totalHargaJual,
+                'status_pembayaran' => 'belum lunas',
+                'keterangan' => 'Pajak',
+            ]
+        );
+    }
+
 }
-
-}
-
