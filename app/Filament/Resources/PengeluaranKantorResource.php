@@ -18,13 +18,13 @@ class PengeluaranKantorResource extends Resource
     protected static ?string $model = PengeluaranKantor::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup      = 'Transaksi';
+    protected static ?string $navigationGroup = 'Transaksi';
     protected static ?string $navigationLabel = 'Pengeluaran Kantor';
 
-public static function canViewAny(): bool
-{
-    return auth()->user()->level == 1;
-}
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->level == 1;
+    }
 
     public static function form(Form $form): Form
     {
@@ -35,6 +35,12 @@ public static function canViewAny(): bool
                 Forms\Components\TextInput::make('pengeluaran')
                     ->required()
                     ->numeric(),
+                Forms\Components\Select::make('pembayaran')
+                    ->options([
+                        'Cash' => 'Cash',
+                        'BCA' => 'BCA',
+                        'Mandiri' => 'Mandiri',
+                    ]),
                 Forms\Components\Textarea::make('remarks')
                     ->columnSpanFull(),
             ]);
@@ -50,6 +56,8 @@ public static function canViewAny(): bool
                 Tables\Columns\TextColumn::make('pengeluaran')
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('pembayaran')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('remarks')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
@@ -60,7 +68,7 @@ public static function canViewAny(): bool
                     ->sortable(),
             ])
             ->filters([
-                    \Filament\Tables\Filters\Filter::make('rentang_tanggal')
+                \Filament\Tables\Filters\Filter::make('rentang_tanggal')
                     ->label('Rentang Tanggal')
                     ->form([
                         \Filament\Forms\Components\DatePicker::make('from')->label('Dari'),
@@ -72,7 +80,7 @@ public static function canViewAny(): bool
                             ->when($data['until'], fn($q, $until) => $q->whereDate('tanggal', '<=', $until));
                     }),
 
-                    
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -83,23 +91,23 @@ public static function canViewAny(): bool
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function ($action, $livewire) {
                         $allFilters = $livewire->tableFilters ?? [];
-            
+
                         $bulanFilter = $allFilters['bulan'] ?? null;
                         $rentangFilter = $allFilters['rentang_tanggal'] ?? null;
-            
+
                         $processedFilters = [
                             'bulan' => is_array($bulanFilter) ? ($bulanFilter['value'] ?? null) : $bulanFilter,
                             'from' => is_array($rentangFilter) ? ($rentangFilter['from'] ?? null) : null,
                             'until' => is_array($rentangFilter) ? ($rentangFilter['until'] ?? null) : null,
                         ];
-            
+
                         return \Maatwebsite\Excel\Facades\Excel::download(
                             new \App\Exports\PengeluaranKantorExport($processedFilters),
                             'pengeluaran_kantor_filtered.xlsx'
                         );
                     }),
             ])
-            
+
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

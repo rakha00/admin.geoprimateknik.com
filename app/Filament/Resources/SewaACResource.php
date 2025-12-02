@@ -25,11 +25,11 @@ class SewaACResource extends Resource
     protected static ?string $navigationLabel = 'Sewa AC';
     protected static ?string $navigationGroup = 'Transaksi';
 
-public static function canViewAny(): bool
-{
-    return auth()->user()->level == 1;
-}
-    
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->level == 1;
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -37,6 +37,12 @@ public static function canViewAny(): bool
                 DatePicker::make('tanggal')->required(),
                 TextInput::make('pemasukan')->numeric()->default(0),
                 TextInput::make('pengeluaran')->numeric()->default(0),
+                Forms\Components\Select::make('pembayaran')
+                    ->options([
+                        'Cash' => 'Cash',
+                        'BCA' => 'BCA',
+                        'Mandiri' => 'Mandiri',
+                    ]),
                 TextInput::make('keterangan_pemasukan'),
                 TextInput::make('keterangan_pengeluaran'),
             ]);
@@ -47,11 +53,12 @@ public static function canViewAny(): bool
         return $table
             ->columns([
                 TextColumn::make('tanggal')->date()->sortable(),
-                TextColumn::make('pemasukan')->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
-                TextColumn::make('pengeluaran')->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                TextColumn::make('pemasukan')->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                TextColumn::make('pengeluaran')->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                TextColumn::make('pembayaran')->sortable(),
             ])
             ->filters([
-                    \Filament\Tables\Filters\Filter::make('rentang_tanggal')
+                \Filament\Tables\Filters\Filter::make('rentang_tanggal')
                     ->label('Rentang Tanggal')
                     ->form([
                         \Filament\Forms\Components\DatePicker::make('from')->label('Dari'),
@@ -63,36 +70,36 @@ public static function canViewAny(): bool
                             ->when($data['until'], fn($q, $until) => $q->whereDate('tanggal', '<=', $until));
                     }),
 
-                  
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
-            ->headerActions([  
+            ->headerActions([
                 Tables\Actions\Action::make('export_excel')
-                ->label('Download Excel')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->action(function ($action, $livewire) {
-                    // Debug: Tampilkan struktur filter yang sebenarnya
-                    $allFilters = $livewire->tableFilters ?? [];
-                    
-                    $bulanFilter = $allFilters['bulan'] ?? null;
-                    $rentangFilter = $allFilters['rentang_tanggal'] ?? null;
+                    ->label('Download Excel')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function ($action, $livewire) {
+                        // Debug: Tampilkan struktur filter yang sebenarnya
+                        $allFilters = $livewire->tableFilters ?? [];
 
-                    
-                    $processedFilters = [
-                        'bulan' => is_array($bulanFilter) ? ($bulanFilter['value'] ?? null) : $bulanFilter,
-                        'from' => is_array($rentangFilter) ? ($rentangFilter['from'] ?? null) : null,
-                        'until' => is_array($rentangFilter) ? ($rentangFilter['until'] ?? null) : null,
-                    ];
+                        $bulanFilter = $allFilters['bulan'] ?? null;
+                        $rentangFilter = $allFilters['rentang_tanggal'] ?? null;
 
-                    return \Maatwebsite\Excel\Facades\Excel::download(
-                        new \App\Exports\SewaACExport($processedFilters),
-                        'sewa_ac_filtered.xlsx'
-                    );
-                })
+
+                        $processedFilters = [
+                            'bulan' => is_array($bulanFilter) ? ($bulanFilter['value'] ?? null) : $bulanFilter,
+                            'from' => is_array($rentangFilter) ? ($rentangFilter['from'] ?? null) : null,
+                            'until' => is_array($rentangFilter) ? ($rentangFilter['until'] ?? null) : null,
+                        ];
+
+                        return \Maatwebsite\Excel\Facades\Excel::download(
+                            new \App\Exports\SewaACExport($processedFilters),
+                            'sewa_ac_filtered.xlsx'
+                        );
+                    })
             ])
-            
+
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
