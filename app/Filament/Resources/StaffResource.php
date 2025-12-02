@@ -35,6 +35,24 @@ class StaffResource extends Resource
                 TextInput::make('no_hp')->required(),
                 Textarea::make('alamat')->required(),
                 TextInput::make('gaji_pokok')->required()->numeric(),
+                \Filament\Forms\Components\Select::make('status')
+                    ->options([
+                        'aktif' => 'Aktif',
+                        'tidak aktif' => 'Tidak Aktif',
+                    ])
+                    ->default('aktif')
+                    ->required()
+                    ->live()
+                    ->live()
+                    ->afterStateUpdated(function (\Filament\Forms\Set $set, $state) {
+                        if ($state === 'tidak aktif') {
+                            $set('terakhir_aktif', now()->format('Y-m-d'));
+                        } else {
+                            $set('terakhir_aktif', null);
+                        }
+                    }),
+                \Filament\Forms\Components\DatePicker::make('terakhir_aktif')
+                    ->readOnly(),
             ]);
     }
 
@@ -44,28 +62,34 @@ class StaffResource extends Resource
             ->columns([
                 TextColumn::make('nama')->searchable(),
                 TextColumn::make('no_hp'),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'aktif' => 'success',
+                        'tidak aktif' => 'danger',
+                    }),
 
                 TextColumn::make('gaji_pokok')
                     ->money('IDR', divideBy: 1, locale: 'id')
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 // === Lembur ===
                 TextColumn::make('lembur')
                     ->label('Lembur')
-                    ->state(fn ($record, $livewire) => self::sumDetailFiltered($record, 'lembur', $livewire))
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->state(fn($record, $livewire) => self::sumDetailFiltered($record, 'lembur', $livewire))
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 // === Bonus ===
                 TextColumn::make('bonus')
                     ->label('Bonus')
-                    ->state(fn ($record, $livewire) => self::sumDetailFiltered($record, 'bonus', $livewire))
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->state(fn($record, $livewire) => self::sumDetailFiltered($record, 'bonus', $livewire))
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 // === Kasbon ===
                 TextColumn::make('kasbon')
                     ->label('Kasbon')
-                    ->state(fn ($record, $livewire) => self::sumDetailFiltered($record, 'kasbon', $livewire))
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->state(fn($record, $livewire) => self::sumDetailFiltered($record, 'kasbon', $livewire))
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 // === Total Gaji ===
                 TextColumn::make('total_gaji')
@@ -75,7 +99,7 @@ class StaffResource extends Resource
                         $bonus = self::sumDetailFiltered($record, 'bonus', $livewire);
                         return $record->gaji_pokok + $lembur + $bonus;
                     })
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 // === Gaji Diterima ===
                 TextColumn::make('gaji_diterima')
@@ -86,7 +110,9 @@ class StaffResource extends Resource
                         $kasbon = self::sumDetailFiltered($record, 'kasbon', $livewire);
                         return $record->gaji_pokok + $lembur + $bonus - $kasbon;
                     })
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+
+                TextColumn::make('terakhir_aktif')->date(),
             ])
             ->filters([
                 // Filter Rentang Tanggal

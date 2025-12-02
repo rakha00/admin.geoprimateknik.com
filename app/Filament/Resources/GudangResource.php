@@ -36,6 +36,23 @@ class GudangResource extends Resource
                 TextInput::make('no_hp')->required(),
                 Textarea::make('alamat')->required(),
                 TextInput::make('gaji_pokok')->required()->numeric(),
+                Forms\Components\Select::make('status')
+                    ->options([
+                        'aktif' => 'Aktif',
+                        'tidak aktif' => 'Tidak Aktif',
+                    ])
+                    ->default('aktif')
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(function (\Filament\Forms\Set $set, $state) {
+                        if ($state === 'tidak aktif') {
+                            $set('terakhir_aktif', now()->format('Y-m-d'));
+                        } else {
+                            $set('terakhir_aktif', null);
+                        }
+                    }),
+                Forms\Components\DatePicker::make('terakhir_aktif')
+                    ->readOnly(),
             ]);
     }
 
@@ -45,38 +62,50 @@ class GudangResource extends Resource
             ->columns([
                 TextColumn::make('nama')->searchable(),
                 TextColumn::make('no_hp'),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'aktif' => 'success',
+                        'tidak aktif' => 'danger',
+                    }),
 
                 TextColumn::make('gaji_pokok')
                     ->label('Gaji Pokok')
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 TextColumn::make('lembur')
                     ->label('Lembur')
-                    ->state(fn ($record, $livewire) =>
+                    ->state(
+                        fn($record, $livewire) =>
                         $record->sumDetail('lembur', $livewire->tableFilters['bulan']['value'] ?? null, null)
                     )
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 TextColumn::make('bonus')
                     ->label('Bonus')
-                    ->state(fn ($record, $livewire) =>
+                    ->state(
+                        fn($record, $livewire) =>
                         $record->sumDetail('bonus', $livewire->tableFilters['bulan']['value'] ?? null, null)
                     )
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 TextColumn::make('kasbon')
                     ->label('Kasbon')
-                    ->state(fn ($record, $livewire) =>
+                    ->state(
+                        fn($record, $livewire) =>
                         $record->sumDetail('kasbon', $livewire->tableFilters['bulan']['value'] ?? null, null)
                     )
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 TextColumn::make('gaji_diterima')
                     ->label('Gaji Diterima')
-                    ->state(fn ($record, $livewire) =>
+                    ->state(
+                        fn($record, $livewire) =>
                         $record->hitungGajiDiterima($livewire->tableFilters['bulan']['value'] ?? null, null)
                     )
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+
+                TextColumn::make('terakhir_aktif')->date(),
             ])
 
             ->filters([
@@ -109,12 +138,12 @@ class GudangResource extends Resource
                     ->action(function ($action, $livewire) {
                         $allFilters = $livewire->tableFilters ?? [];
 
-                        $bulanFilter   = $allFilters['bulan'] ?? null;
+                        $bulanFilter = $allFilters['bulan'] ?? null;
                         $rentangFilter = $allFilters['rentang_tanggal'] ?? null;
 
                         $processedFilters = [
                             'bulan' => is_array($bulanFilter) ? ($bulanFilter['value'] ?? null) : $bulanFilter,
-                            'from'  => is_array($rentangFilter) ? ($rentangFilter['from'] ?? null) : null,
+                            'from' => is_array($rentangFilter) ? ($rentangFilter['from'] ?? null) : null,
                             'until' => is_array($rentangFilter) ? ($rentangFilter['until'] ?? null) : null,
                         ];
 

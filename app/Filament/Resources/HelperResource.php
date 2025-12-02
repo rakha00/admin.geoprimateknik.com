@@ -36,77 +36,106 @@ class HelperResource extends Resource
                 TextInput::make('no_hp')->required(),
                 Textarea::make('alamat')->required(),
                 TextInput::make('gaji_pokok')->required()->numeric(),
+                Forms\Components\Select::make('status')
+                    ->options([
+                        'aktif' => 'Aktif',
+                        'tidak aktif' => 'Tidak Aktif',
+                    ])
+                    ->default('aktif')
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(function (\Filament\Forms\Set $set, $state) {
+                        if ($state === 'tidak aktif') {
+                            $set('terakhir_aktif', now()->format('Y-m-d'));
+                        } else {
+                            $set('terakhir_aktif', null);
+                        }
+                    }),
+                Forms\Components\DatePicker::make('terakhir_aktif')
+                    ->readOnly(),
             ]);
     }
 
-public static function table(Table $table): Table
-{
-    return $table
-        ->columns([
-            TextColumn::make('nama')->searchable(),
-            TextColumn::make('no_hp'),
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('nama')->searchable(),
+                TextColumn::make('no_hp'),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'aktif' => 'success',
+                        'tidak aktif' => 'danger',
+                    }),
 
-            TextColumn::make('gaji_pokok')
-                ->label('Gaji Pokok')
-                ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                TextColumn::make('gaji_pokok')
+                    ->label('Gaji Pokok')
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
-            TextColumn::make('lembur')
-                ->label('Lembur')
-                ->state(fn ($record, $livewire) => 
-                    $record->sumDetail(
-                        'lembur',
-                        $livewire->tableFilters['bulan']['value'] ?? null,
-                        $livewire->tableFilters['tanggal']['from'] ?? null,
-                        $livewire->tableFilters['tanggal']['until'] ?? null
+                TextColumn::make('lembur')
+                    ->label('Lembur')
+                    ->state(
+                        fn($record, $livewire) =>
+                        $record->sumDetail(
+                            'lembur',
+                            $livewire->tableFilters['bulan']['value'] ?? null,
+                            $livewire->tableFilters['tanggal']['from'] ?? null,
+                            $livewire->tableFilters['tanggal']['until'] ?? null
+                        )
                     )
-                )
-                ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
-            TextColumn::make('bonus')
-                ->label('Bonus')
-                ->state(fn ($record, $livewire) => 
-                    $record->sumDetail(
-                        'bonus',
-                        $livewire->tableFilters['bulan']['value'] ?? null,
-                        $livewire->tableFilters['tanggal']['from'] ?? null,
-                        $livewire->tableFilters['tanggal']['until'] ?? null
+                TextColumn::make('bonus')
+                    ->label('Bonus')
+                    ->state(
+                        fn($record, $livewire) =>
+                        $record->sumDetail(
+                            'bonus',
+                            $livewire->tableFilters['bulan']['value'] ?? null,
+                            $livewire->tableFilters['tanggal']['from'] ?? null,
+                            $livewire->tableFilters['tanggal']['until'] ?? null
+                        )
                     )
-                )
-                ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
-            TextColumn::make('kasbon')
-                ->label('Kasbon')
-                ->state(fn ($record, $livewire) => 
-                    $record->sumDetail(
-                        'kasbon',
-                        $livewire->tableFilters['bulan']['value'] ?? null,
-                        $livewire->tableFilters['tanggal']['from'] ?? null,
-                        $livewire->tableFilters['tanggal']['until'] ?? null
+                TextColumn::make('kasbon')
+                    ->label('Kasbon')
+                    ->state(
+                        fn($record, $livewire) =>
+                        $record->sumDetail(
+                            'kasbon',
+                            $livewire->tableFilters['bulan']['value'] ?? null,
+                            $livewire->tableFilters['tanggal']['from'] ?? null,
+                            $livewire->tableFilters['tanggal']['until'] ?? null
+                        )
                     )
-                )
-                ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
-            TextColumn::make('gaji_diterima')
-                ->label('Gaji Diterima')
-                ->state(fn ($record, $livewire) => 
-                    $record->hitungGajiDiterima(
-                        $livewire->tableFilters['bulan']['value'] ?? null,
-                        $livewire->tableFilters['tanggal']['from'] ?? null,
-                        $livewire->tableFilters['tanggal']['until'] ?? null
+                TextColumn::make('gaji_diterima')
+                    ->label('Gaji Diterima')
+                    ->state(
+                        fn($record, $livewire) =>
+                        $record->hitungGajiDiterima(
+                            $livewire->tableFilters['bulan']['value'] ?? null,
+                            $livewire->tableFilters['tanggal']['from'] ?? null,
+                            $livewire->tableFilters['tanggal']['until'] ?? null
+                        )
                     )
-                )
-                ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
-        ])
-        ->filters([
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
-            \Filament\Tables\Filters\Filter::make('tanggal')
-                ->form([
+                TextColumn::make('terakhir_aktif')->date(),
+            ])
+            ->filters([
+
+                \Filament\Tables\Filters\Filter::make('tanggal')
+                    ->form([
                         \Filament\Forms\Components\DatePicker::make('from')->label('Dari'),
                         \Filament\Forms\Components\DatePicker::make('until')->label('Sampai'),
-                ])
-                ->query(fn ($query, $data) => $query),
-        ]);
-}
+                    ])
+                    ->query(fn($query, $data) => $query),
+            ]);
+    }
 
 
     public static function getRelations(): array

@@ -20,6 +20,8 @@ class Sales extends Model
         'remarks',
         'gaji_pokok',
         'uang_transport',
+        'status',
+        'terakhir_aktif',
     ];
 
     /**
@@ -36,20 +38,20 @@ class Sales extends Model
     }
 
     public function filterDetailSum($field, $filters)
-{
-    $bulan = $filters['bulan']['value'] ?? null;
-    $from  = $filters['rentang_tanggal']['from'] ?? null;
-    $until = $filters['rentang_tanggal']['until'] ?? null;
+    {
+        $bulan = $filters['bulan']['value'] ?? null;
+        $from = $filters['rentang_tanggal']['from'] ?? null;
+        $until = $filters['rentang_tanggal']['until'] ?? null;
 
-    return $this->penghasilanDetails
-        ->filter(function ($detail) use ($bulan, $from, $until) {
-            $tanggal = $detail->tanggal ? \Illuminate\Support\Carbon::parse($detail->tanggal) : null;
+        return $this->penghasilanDetails
+            ->filter(function ($detail) use ($bulan, $from, $until) {
+                $tanggal = $detail->tanggal ? \Illuminate\Support\Carbon::parse($detail->tanggal) : null;
 
-            return (!$bulan || ($tanggal && $tanggal->month == $bulan))
-                && (!$from || ($tanggal && $tanggal->greaterThanOrEqualTo($from)))
-                && (!$until || ($tanggal && $tanggal->lessThanOrEqualTo($until)));
-        })
-        ->sum($field);
-}
+                return (!$bulan || ($tanggal && $tanggal->month == $bulan))
+                    && (!$from || ($tanggal && $tanggal->greaterThanOrEqualTo($from)))
+                    && (!$until || ($tanggal && $tanggal->lessThanOrEqualTo($until)));
+            })
+            ->sum($field);
+    }
 
 }

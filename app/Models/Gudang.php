@@ -10,9 +10,9 @@ use Illuminate\Support\Carbon;
 class Gudang extends Model
 {
     use HasFactory;
-    protected $fillable = ['nama', 'no_hp', 'alamat', 'gaji_pokok'];
+    protected $fillable = ['nama', 'no_hp', 'alamat', 'gaji_pokok', 'status', 'terakhir_aktif'];
 
-  public function penghasilanDetails()
+    public function penghasilanDetails()
     {
         return $this->hasMany(DetailPenghasilanGudang::class);
     }
@@ -32,7 +32,7 @@ class Gudang extends Model
     public function hitungGajiDiterima($bulan = null, $tahun = null)
     {
         $lembur = $this->sumDetail('lembur', $bulan, $tahun);
-        $bonus  = $this->sumDetail('bonus', $bulan, $tahun);
+        $bonus = $this->sumDetail('bonus', $bulan, $tahun);
         $kasbon = $this->sumDetail('kasbon', $bulan, $tahun);
 
         return $this->gaji_pokok + $lembur + $bonus - $kasbon;

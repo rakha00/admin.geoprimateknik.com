@@ -33,6 +33,23 @@ class TeknisiResource extends Resource
             TextInput::make('no_hp')->required(),
             Textarea::make('alamat')->required(),
             TextInput::make('gaji_pokok')->required()->numeric(),
+            \Filament\Forms\Components\Select::make('status')
+                ->options([
+                    'aktif' => 'Aktif',
+                    'tidak aktif' => 'Tidak Aktif',
+                ])
+                ->default('aktif')
+                ->required()
+                ->live()
+                ->afterStateUpdated(function (\Filament\Forms\Set $set, $state) {
+                    if ($state === 'tidak aktif') {
+                        $set('terakhir_aktif', now()->format('Y-m-d'));
+                    } else {
+                        $set('terakhir_aktif', null);
+                    }
+                }),
+            \Filament\Forms\Components\DatePicker::make('terakhir_aktif')
+                ->readOnly(),
         ]);
     }
 
@@ -42,63 +59,71 @@ class TeknisiResource extends Resource
             ->columns([
                 TextColumn::make('nama')->searchable(),
                 TextColumn::make('no_hp'),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'aktif' => 'success',
+                        'tidak aktif' => 'danger',
+                    }),
 
                 TextColumn::make('gaji_pokok')
                     ->money('IDR', divideBy: 1, locale: 'id')
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 TextColumn::make('lembur')
                     ->label('Lembur')
                     ->state(function ($record, $livewire) {
-                        $from  = $livewire->tableFilters['tanggal']['from'] ?? null;
+                        $from = $livewire->tableFilters['tanggal']['from'] ?? null;
                         $until = $livewire->tableFilters['tanggal']['until'] ?? null;
 
                         return $record->sumDetail('lembur', $from, $until);
                     })
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 TextColumn::make('bonus')
                     ->label('Bonus')
                     ->state(function ($record, $livewire) {
-                        $from  = $livewire->tableFilters['tanggal']['from'] ?? null;
+                        $from = $livewire->tableFilters['tanggal']['from'] ?? null;
                         $until = $livewire->tableFilters['tanggal']['until'] ?? null;
 
                         return $record->sumDetail('bonus', $from, $until);
                     })
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 TextColumn::make('kasbon')
                     ->label('Kasbon')
                     ->state(function ($record, $livewire) {
-                        $from  = $livewire->tableFilters['tanggal']['from'] ?? null;
+                        $from = $livewire->tableFilters['tanggal']['from'] ?? null;
                         $until = $livewire->tableFilters['tanggal']['until'] ?? null;
 
                         return $record->sumDetail('kasbon', $from, $until);
                     })
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 TextColumn::make('total_gaji')
                     ->label('Total Gaji')
                     ->state(function ($record, $livewire) {
-                        $from  = $livewire->tableFilters['tanggal']['from'] ?? null;
+                        $from = $livewire->tableFilters['tanggal']['from'] ?? null;
                         $until = $livewire->tableFilters['tanggal']['until'] ?? null;
 
                         $lembur = $record->sumDetail('lembur', $from, $until);
-                        $bonus  = $record->sumDetail('bonus', $from, $until);
+                        $bonus = $record->sumDetail('bonus', $from, $until);
 
                         return $record->gaji_pokok + $lembur + $bonus;
                     })
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 TextColumn::make('gaji_diterima')
                     ->label('Gaji Diterima')
                     ->state(function ($record, $livewire) {
-                        $from  = $livewire->tableFilters['tanggal']['from'] ?? null;
+                        $from = $livewire->tableFilters['tanggal']['from'] ?? null;
                         $until = $livewire->tableFilters['tanggal']['until'] ?? null;
 
                         return $record->hitungGajiDiterima($from, $until);
                     })
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+
+                TextColumn::make('terakhir_aktif')->date(),
             ])
             ->filters([
 
@@ -127,7 +152,7 @@ class TeknisiResource extends Resource
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function ($action, $livewire) {
                         $filters = $livewire->tableFilters ?? [];
-                        $from  = $filters['tanggal']['from'] ?? null;
+                        $from = $filters['tanggal']['from'] ?? null;
                         $until = $filters['tanggal']['until'] ?? null;
 
                         return \Maatwebsite\Excel\Facades\Excel::download(

@@ -10,9 +10,9 @@ class Helper extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nama', 'no_hp', 'alamat', 'gaji_pokok'];
+    protected $fillable = ['nama', 'no_hp', 'alamat', 'gaji_pokok', 'status', 'terakhir_aktif'];
 
-public function penghasilanDetails()
+    public function penghasilanDetails()
     {
         return $this->hasMany(DetailPenghasilanHelper::class);
     }
@@ -33,7 +33,7 @@ public function penghasilanDetails()
     public function hitungGajiDiterima($bulan = null, $from = null, $until = null)
     {
         $lembur = $this->sumDetail('lembur', $bulan, $from, $until);
-        $bonus  = $this->sumDetail('bonus', $bulan, $from, $until);
+        $bonus = $this->sumDetail('bonus', $bulan, $from, $until);
         $kasbon = $this->sumDetail('kasbon', $bulan, $from, $until);
 
         return $this->gaji_pokok + $lembur + $bonus - $kasbon;
