@@ -17,14 +17,14 @@ class BarangMasukResource extends Resource
 {
     protected static ?string $model = BarangMasuk::class;
 
-    protected static ?string $navigationIcon  = 'heroicon-o-archive-box-arrow-down';
+    protected static ?string $navigationIcon = 'heroicon-o-archive-box-arrow-down';
     protected static ?string $navigationLabel = 'Barang Masuk';
     protected static ?string $navigationGroup = 'Transaksi';
 
-public static function canViewAny(): bool
-{
-    return auth()->user()->level == 1;
-}
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->level == 1;
+    }
 
     public static function form(Form $form): Form
     {
@@ -37,47 +37,55 @@ public static function canViewAny(): bool
                     ->searchable()
                     ->required(),
 
-                    Forms\Components\DatePicker::make('tanggal')
+                Forms\Components\DatePicker::make('tanggal')
                     ->label('Tanggal')
                     ->required()
                     ->reactive()
                     ->afterStateUpdated(function ($state, $get, $set) {
-                        if (! $state) {
+                        if (!$state) {
                             return;
                         }
-                        $d     = Carbon::parse($state)->format('dmY');
+                        $d = Carbon::parse($state)->format('dmY');
                         $count = BarangMasuk::whereDate('tanggal', $state)->count() + 1;
                         $set('nomor_barang_masuk', "BM/{$d}-{$count}");
                     }),
-    
+
                 Forms\Components\TextInput::make('nomor_barang_masuk')
                     ->label('Nomor Barang Masuk')
                     ->readOnly()
                     ->reactive()
                     ->required()
                     ->maxLength(50),
+
+                Forms\Components\Select::make('status')
+                    ->label('Status')
+                    ->options([
+                        'PO' => 'PO',
+                        'Selesai' => 'Selesai',
+                    ])
+                    ->required(),
             ]);
     }
 
     public static function mutateFormDataBeforeCreate(array $data): array
-{
-    $d     = Carbon::parse($data['tanggal'])->format('dmY');
-    $count = BarangMasuk::whereDate('tanggal', $data['tanggal'])->count() + 1;
-    $data['nomor_barang_masuk'] = "BM/{$d}-{$count}";
-    return $data;
-}
-
-public static function mutateFormDataBeforeSave(array $data, BarangMasuk $record): array
-{
-    if (isset($data['tanggal'])) {
-        $d     = Carbon::parse($data['tanggal'])->format('dmY');
-        $count = BarangMasuk::whereDate('tanggal', $data['tanggal'])
-                    ->where('id', '!=', $record->id)
-                    ->count() + 1;
+    {
+        $d = Carbon::parse($data['tanggal'])->format('dmY');
+        $count = BarangMasuk::whereDate('tanggal', $data['tanggal'])->count() + 1;
         $data['nomor_barang_masuk'] = "BM/{$d}-{$count}";
+        return $data;
     }
-    return $data;
-}
+
+    public static function mutateFormDataBeforeSave(array $data, BarangMasuk $record): array
+    {
+        if (isset($data['tanggal'])) {
+            $d = Carbon::parse($data['tanggal'])->format('dmY');
+            $count = BarangMasuk::whereDate('tanggal', $data['tanggal'])
+                ->where('id', '!=', $record->id)
+                ->count() + 1;
+            $data['nomor_barang_masuk'] = "BM/{$d}-{$count}";
+        }
+        return $data;
+    }
 
     public static function table(Table $table): Table
     {
@@ -101,13 +109,17 @@ public static function mutateFormDataBeforeSave(array $data, BarangMasuk $record
                     ->label('Diubah')
                     ->dateTime()
                     ->sortable(),
-                    
+
                 Tables\Columns\TextColumn::make('nomor_barang_masuk')
                     ->label('No. Barang Masuk')
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->sortable(),
             ])
             ->filters([
-                    \Filament\Tables\Filters\Filter::make('rentang_tanggal')
+                \Filament\Tables\Filters\Filter::make('rentang_tanggal')
                     ->label('Rentang Tanggal')
                     ->form([
                         \Filament\Forms\Components\DatePicker::make('from')->label('Dari'),
@@ -119,7 +131,7 @@ public static function mutateFormDataBeforeSave(array $data, BarangMasuk $record
                             ->when($data['until'], fn($q, $until) => $q->whereDate('tanggal', '<=', $until));
                     }),
 
-                    
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -130,24 +142,24 @@ public static function mutateFormDataBeforeSave(array $data, BarangMasuk $record
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function ($action, $livewire) {
                         $allFilters = $livewire->tableFilters ?? [];
-            
+
                         $bulanFilter = $allFilters['bulan'] ?? null;
                         $rentangFilter = $allFilters['rentang_tanggal'] ?? null;
-            
+
                         $filters = [
                             'bulan' => is_array($bulanFilter) ? ($bulanFilter['value'] ?? null) : $bulanFilter,
                             'from' => is_array($rentangFilter) ? ($rentangFilter['from'] ?? null) : null,
                             'until' => is_array($rentangFilter) ? ($rentangFilter['until'] ?? null) : null,
                         ];
-            
+
                         return \Maatwebsite\Excel\Facades\Excel::download(
                             new \App\Exports\BarangMasukExport($filters),
                             'barang_masuk_filtered.xlsx'
                         );
                     }),
             ])
-            
-            
+
+
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
             ]);
@@ -163,9 +175,9 @@ public static function mutateFormDataBeforeSave(array $data, BarangMasuk $record
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListBarangMasuks::route('/'),
+            'index' => Pages\ListBarangMasuks::route('/'),
             'create' => Pages\CreateBarangMasuk::route('/create'),
-            'edit'   => Pages\EditBarangMasuk::route('/{record}/edit'),
+            'edit' => Pages\EditBarangMasuk::route('/{record}/edit'),
         ];
     }
 }
