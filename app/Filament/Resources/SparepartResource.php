@@ -55,6 +55,7 @@ class SparepartResource extends Resource
             Tables\Columns\TextColumn::make('satuan'),
             Tables\Columns\TextColumn::make('stock_awal'),
             Tables\Columns\TextColumn::make('stok_masuk')->label('Stok Masuk'),
+            Tables\Columns\TextColumn::make('stok_keluar')->label('Stok Keluar'),
             Tables\Columns\TextColumn::make('stok_akhir')->label('Stok Akhir'),
         ])
             ->actions([

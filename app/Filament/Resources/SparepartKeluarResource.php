@@ -2,11 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PajakResource\Pages\EditPajak;
-use App\Filament\Resources\PajakResource\Pages\ListPajaks;
-use App\Filament\Resources\PajakResource\Pages\CreatePajak;
-use App\Filament\Resources\PajakResource\RelationManagers\PajakDetailRelationManager;
-use App\Models\Pajak;
+use App\Filament\Resources\SparepartKeluarResource\Pages;
+use App\Filament\Resources\SparepartKeluarResource\RelationManagers;
+use App\Models\SparepartKeluar;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -22,17 +20,15 @@ use Illuminate\Support\Carbon;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\EditAction;
 
-class PajakResource extends Resource
+class SparepartKeluarResource extends Resource
 {
-    protected static ?string $model = Pajak::class;
-    protected static ?string $navigationIcon = 'heroicon-o-banknotes';
+    protected static ?string $model = SparepartKeluar::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
     protected static ?string $navigationGroup = 'Transaksi';
-    protected static ?string $navigationLabel = 'Transaksi Produk Pajak';
+    protected static ?string $navigationLabel = 'Sparepart Keluar';
     protected static ?string $recordTitleAttribute = 'no_invoice';
-    public static function getPluralLabel(): string
-    {
-        return 'Transaksi Produk Pajak'; // judul di list page
-    }
+
     public static function form(Form $form): Form
     {
         return $form->schema([
@@ -100,7 +96,7 @@ class PajakResource extends Resource
         return $data;
     }
 
-    public static function mutateFormDataBeforeSave(array $data, Pajak $record): array
+    public static function mutateFormDataBeforeSave(array $data, SparepartKeluar $record): array
     {
         if (isset($data['tanggal'])) {
             $codes = self::generateCode($data['tanggal'], $record->id);
@@ -137,15 +133,15 @@ class PajakResource extends Resource
         $yy = $date->format('y');
         $romanMonth = self::getRomanMonth($date->month);
 
-        $query = Pajak::withTrashed()->whereYear('tanggal', $year);
+        $query = SparepartKeluar::withTrashed()->whereYear('tanggal', $year);
         if ($ignoreId) {
             $query->where('id', '!=', $ignoreId);
         }
 
         $lastNumber = $query->get()
             ->map(function ($item) use ($yy) {
-                // Match GTP-PAJINV/YY/ROMAN/SEQ
-                if (preg_match("/^GTP-PAJINV\/{$yy}\/[IVX]+\/(\d+)$/", $item->no_invoice, $matches)) {
+                // Match GTP-SPKINV/YY/ROMAN/SEQ
+                if (preg_match("/^GTP-SPKINV\/{$yy}\/[IVX]+\/(\d+)$/", $item->no_invoice, $matches)) {
                     return (int) $matches[1];
                 }
                 return 0;
@@ -156,8 +152,8 @@ class PajakResource extends Resource
         $sequence = str_pad($newNumber, 4, '0', STR_PAD_LEFT);
 
         return [
-            'invoice' => "GTP-PAJINV/{$yy}/{$romanMonth}/{$sequence}",
-            'surat_jalan' => "GTP-PAJSJ/{$yy}/{$romanMonth}/{$sequence}",
+            'invoice' => "GTP-SPKINV/{$yy}/{$romanMonth}/{$sequence}",
+            'surat_jalan' => "GTP-SPKSJ/{$yy}/{$romanMonth}/{$sequence}",
         ];
     }
 
@@ -174,7 +170,7 @@ class PajakResource extends Resource
                 TextColumn::make('total_harga_jual')
                     ->label('Total Harga Jual')
                     ->getStateUsing(
-                        fn(Pajak $record): int =>
+                        fn(SparepartKeluar $record): int =>
                         $record->details->sum(function ($detail) {
                             return ($detail->harga_jual ?? 0) * ($detail->jumlah_keluar ?? 0);
                         })
@@ -187,7 +183,7 @@ class PajakResource extends Resource
                 TextColumn::make('total_keuntungan')
                     ->label('Total Keuntungan')
                     ->getStateUsing(
-                        fn(Pajak $record): int =>
+                        fn(SparepartKeluar $record): int =>
                         $record->details->sum(function ($detail) {
                             $totalJual = ($detail->harga_jual ?? 0) * ($detail->jumlah_keluar ?? 0);
                             $totalModal = ($detail->harga_modal ?? 0) * ($detail->jumlah_keluar ?? 0);
@@ -199,33 +195,6 @@ class PajakResource extends Resource
                         number_format($state, 0, ',', '.')
                     ),
             ])
-
-            ->actions([
-                EditAction::make(),
-
-                Action::make('download')
-                    ->label('Download')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->form([
-                        Select::make('type')
-                            ->label('Dokumen')
-                            ->options([
-                                // 'surat_jalan_sjt'  => 'Surat Jalan SJT',
-                                'surat_jalan_apjt' => 'Surat Jalan',
-                                // 'invoice_sjt'      => 'Invoice SJT',
-                                'invoice_apjt' => 'Invoice',
-                            ])
-                            ->required(),
-                    ])
-                    ->action(fn(Pajak $record, array $data) => redirect()->to(
-                        route(match ($data['type']) {
-                            'surat_jalan_apjt' => 'transaksi-produk.surat-jalan.apjt',
-                            'invoice_apjt' => 'transaksi-produk.invoice.apjt',
-                        }, $record)
-                    ))
-
-            ])
-
             ->filters([
                 \Filament\Tables\Filters\Filter::make('rentang_tanggal')
                     ->label('Rentang Tanggal')
@@ -238,23 +207,31 @@ class PajakResource extends Resource
                             ->when($data['from'], fn($q, $from) => $q->whereDate('tanggal', '>=', $from))
                             ->when($data['until'], fn($q, $until) => $q->whereDate('tanggal', '<=', $until));
                     }),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                // Add download action if needed, similar to PajakResource
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
             ]);
     }
-
 
     public static function getRelations(): array
     {
         return [
-            PajakDetailRelationManager::class,
+            RelationManagers\DetailsRelationManager::class,
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => ListPajaks::route('/'),
-            'create' => CreatePajak::route('/create'),
-            'edit' => EditPajak::route('/{record}/edit'),
+            'index' => Pages\ListSparepartKeluars::route('/'),
+            'create' => Pages\CreateSparepartKeluar::route('/create'),
+            'edit' => Pages\EditSparepartKeluar::route('/{record}/edit'),
         ];
     }
 }
