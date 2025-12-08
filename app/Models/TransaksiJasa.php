@@ -38,7 +38,18 @@ class TransaksiJasa extends Model
         });
 
         static::updated(function (TransaksiJasa $model) {
-            // Logic to update Piutang if needed
+            // Update related Piutang when total_pendapatan_jasa changes
+            $piutang = \App\Models\Piutang::where('transaksi_jasa_id', $model->id)->first();
+            if ($piutang) {
+                $piutang->update([
+                    'total_harga_modal' => $model->total_pendapatan_jasa,
+                ]);
+            }
+        });
+
+        static::deleted(function (TransaksiJasa $model) {
+            // Delete related Piutang when TransaksiJasa is deleted
+            \App\Models\Piutang::where('transaksi_jasa_id', $model->id)->delete();
         });
     }
 

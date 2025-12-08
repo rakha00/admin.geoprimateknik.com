@@ -97,7 +97,7 @@ class PiutangResource extends Resource
             ->columns([
                 TextColumn::make('tanggal')
                     ->label('Tanggal')
-                    ->getStateUsing(fn($record) => $record->pajak->tanggal ?? $record->nonPajak->tanggal ?? $record->sparepartKeluar->tanggal ?? '-')
+                    ->getStateUsing(fn($record) => $record->pajak->tanggal ?? $record->nonPajak->tanggal ?? $record->sparepartKeluar->tanggal ?? $record->transaksiJasa->tanggal_transaksi ?? '-')
                     ->date(),
 
                 TextColumn::make('invoice')
@@ -106,7 +106,8 @@ class PiutangResource extends Resource
                         fn($record) =>
                         $record->pajak->no_invoice
                         ?? ($record->nonPajak ? $record->nonPajak->no_invoice_non_pajak : null)
-                        ?? ($record->sparepartKeluar ? $record->sparepartKeluar->no_invoice : '-')
+                        ?? ($record->sparepartKeluar ? $record->sparepartKeluar->no_invoice : null)
+                        ?? ($record->transaksiJasa ? $record->transaksiJasa->no_invoice : '-')
                     ),
 
                 TextColumn::make('total_harga_modal')
@@ -138,7 +139,7 @@ class PiutangResource extends Resource
             ])
             ->modifyQueryUsing(
                 fn(Builder $query) =>
-                $query->with(['pajak.details', 'nonPajak.details', 'sparepartKeluar.details'])
+                $query->with(['pajak.details', 'nonPajak.details', 'sparepartKeluar.details', 'transaksiJasa'])
             )
             ->filters([
                 // Filter Bulan - DIPERBAIKI
@@ -169,6 +170,9 @@ class PiutangResource extends Resource
                                     })
                                     ->orWhereHas('sparepartKeluar', function ($sq) use ($data) {
                                         $sq->whereMonth('tanggal', $data['value']);
+                                    })
+                                    ->orWhereHas('transaksiJasa', function ($tj) use ($data) {
+                                        $tj->whereMonth('tanggal_transaksi', $data['value']);
                                     });
                             });
                         }
@@ -196,6 +200,9 @@ class PiutangResource extends Resource
                                     })
                                     ->orWhereHas('sparepartKeluar', function ($sq) use ($data) {
                                         $sq->whereYear('tanggal', $data['value']);
+                                    })
+                                    ->orWhereHas('transaksiJasa', function ($tj) use ($data) {
+                                        $tj->whereYear('tanggal_transaksi', $data['value']);
                                     });
                             });
                         }
@@ -240,6 +247,17 @@ class PiutangResource extends Resource
                                         }
                                         if ($data['until']) {
                                             $sparepartKeluar->whereDate('tanggal', '<=', $data['until']);
+                                        }
+                                    });
+                                })
+                                ->orWhere(function ($subQuery) use ($data) {
+                                    // Filter untuk transaksi jasa
+                                    $subQuery->whereHas('transaksiJasa', function ($transaksiJasa) use ($data) {
+                                        if ($data['from']) {
+                                            $transaksiJasa->whereDate('tanggal_transaksi', '>=', $data['from']);
+                                        }
+                                        if ($data['until']) {
+                                            $transaksiJasa->whereDate('tanggal_transaksi', '<=', $data['until']);
                                         }
                                     });
                                 });
