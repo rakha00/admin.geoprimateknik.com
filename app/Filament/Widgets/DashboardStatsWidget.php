@@ -115,14 +115,14 @@ class DashboardStatsWidget extends BaseWidget
         $query = TransaksiJasa::query();
 
         if ($bulan) {
-            $query->whereMonth('tanggal', $bulan);
+            $query->whereMonth('tanggal_transaksi', $bulan);
         }
         if ($tahun) {
-            $query->whereYear('tanggal', $tahun);
+            $query->whereYear('tanggal_transaksi', $tahun);
         }
 
         $total = $query->get()->sum(function ($item) {
-            return ($item->pemasukan ?? 0) - ($item->pengeluaran ?? 0);
+            return ($item->total_pendapatan_jasa ?? 0) - ($item->total_pengeluaran_jasa ?? 0);
         });
 
         return Stat::make('Keuntungan Jasa', 'Rp ' . number_format($total, 0, ',', '.'))
@@ -271,12 +271,12 @@ class DashboardStatsWidget extends BaseWidget
     {
         $query = TransaksiJasa::query();
         if ($bulan)
-            $query->whereMonth('tanggal', $bulan);
+            $query->whereMonth('tanggal_transaksi', $bulan);
         if ($tahun)
-            $query->whereYear('tanggal', $tahun);
+            $query->whereYear('tanggal_transaksi', $tahun);
 
         return $query->get()->sum(function ($item) {
-            return ($item->pemasukan ?? 0) - ($item->pengeluaran ?? 0);
+            return ($item->total_pendapatan_jasa ?? 0) - ($item->total_pengeluaran_jasa ?? 0);
         });
     }
 

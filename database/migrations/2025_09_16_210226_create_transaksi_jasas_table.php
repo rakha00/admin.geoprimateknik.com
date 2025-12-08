@@ -10,30 +10,25 @@ return new class extends Migration {
     {
         Schema::create('transaksi_jasas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('konsumen_jasa_id')
-                ->nullable()
-                ->constrained('konsumen_jasas')
-                ->onDelete('set null');
-            $table->foreignId('teknisi_id')
-                ->nullable()
-                ->constrained('teknisis')
-                ->onDelete('set null');
-            $table->foreignId('helper_id')
-                ->nullable()
-                ->constrained('helpers')
-                ->onDelete('set null');
-                
-            $table->date('tanggal');
-            $table->decimal('pemasukan', 15, 2);
-            $table->string('remarks_pemasukan')->nullable();
-            $table->decimal('pengeluaran', 15, 2);
-            $table->string('remarks_pengeluaran')->nullable();
-            $table->decimal('pemasukan_bersih', 15, 2)->default(0);
+            $table->date('tanggal_transaksi')->nullable();
+            $table->string('no_invoice')->nullable();
+            $table->string('no_surat_jalan')->nullable();
+
+            $table->foreignId('teknisi_id')->nullable()->constrained('teknisis')->nullOnDelete();
+            $table->foreignId('helper_id')->nullable()->constrained('helpers')->nullOnDelete();
+            $table->foreignId('konsumen_jasa_id')->nullable()->constrained('konsumen_jasas')->nullOnDelete();
+
+            $table->decimal('total_pendapatan_jasa', 15, 2)->nullable();
+            $table->decimal('total_pengeluaran_jasa', 15, 2)->nullable();
+            $table->decimal('total_keuntungan_jasa', 15, 2)->nullable();
+            $table->text('keluhan')->nullable();
+
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
-    
+
 
     public function down(): void
     {

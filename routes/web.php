@@ -29,3 +29,9 @@ Route::get('/transaksi-produk/{transaksi}/invoice/sjt', [TransaksiProdukPdfContr
 
 Route::get('/transaksi-produk/{transaksi}/invoice/apjt', [TransaksiProdukPdfController::class, 'invoiceApjt'])
     ->name('transaksi-produk.invoice.apjt');
+
+Route::get('/transaksi-jasa/{transaksi}/invoice', [\App\Http\Controllers\TransaksiJasaPdfController::class, 'invoice'])
+    ->name('transaksi-jasa.print.invoice');
+
+Route::get('/transaksi-jasa/{transaksi}/surat-jalan', [\App\Http\Controllers\TransaksiJasaPdfController::class, 'suratJalan'])
+    ->name('transaksi-jasa.print.surat-jalan');

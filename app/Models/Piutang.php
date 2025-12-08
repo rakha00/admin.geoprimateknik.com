@@ -13,6 +13,7 @@ class Piutang extends Model
         'pajak_id',
         'non_pajak_id',
         'sparepart_keluar_id',
+        'transaksi_jasa_id',
         'due_date',
         'keterangan',
         'status_pembayaran',
@@ -41,6 +42,10 @@ class Piutang extends Model
                 $sparepartKeluar = SparepartKeluar::with('details')->find($piutang->sparepart_keluar_id);
                 $piutang->total_harga_modal = $sparepartKeluar->details->sum(fn($d) => $d->total_harga_jual ?? ($d->harga_jual * $d->jumlah_keluar));
                 $piutang->due_date = $sparepartKeluar->tanggal ?? null;
+            } elseif ($piutang->transaksi_jasa_id) {
+                $transaksiJasa = TransaksiJasa::find($piutang->transaksi_jasa_id);
+                $piutang->total_harga_modal = $piutang->total_harga_modal ?: ($transaksiJasa->total_pendapatan_jasa ?? 0);
+                $piutang->due_date = $piutang->due_date ?: ($transaksiJasa->tanggal_transaksi ?? null);
             }
         });
     }
@@ -68,5 +73,10 @@ class Piutang extends Model
     public function nonPajak()
     {
         return $this->belongsTo(NonPajak::class);
+    }
+
+    public function transaksiJasa()
+    {
+        return $this->belongsTo(TransaksiJasa::class);
     }
 }
