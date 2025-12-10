@@ -40,19 +40,22 @@ class DashboardStatsWidget extends BaseWidget
         $tahun = $this->filters['tahun'] ?? date('Y');
 
         return [
-            // Baris pertama - Keuntungan
-            $this->getKeuntunganProdukStat($bulan, $tahun),
-            $this->getKeuntunganJasaStat($bulan, $tahun),
+            // === TOTAL SALDO (ALL-TIME, tidak terpengaruh filter) ===
+            $this->getTotalSaldoCashStat(),
+            $this->getTotalSaldoBCAStat(),
+            $this->getTotalSaldoMandiriStat(),
 
-            // Baris kedua - Sewa AC dan Pengeluaran Kantor
-            $this->getKeuntunganSewaACStat($bulan, $tahun),
-            $this->getPengeluaranKantorStat($bulan, $tahun),
-
-            // Baris ketiga - Pengeluaran Transaksi,
+            // === RINGKASAN UTAMA ===
             $this->getTotalKeuntunganBersihStat($bulan, $tahun),
             $this->getTotalGajiSemuaKaryawanStat($bulan, $tahun),
+            $this->getTotalPengeluaranStat($bulan, $tahun),
 
-            // Widget Metode Pembayaran - Net Income (Pemasukan - Pengeluaran)
+            // === BREAKDOWN KEUNTUNGAN PER KATEGORI ===
+            $this->getKeuntunganProdukStat($bulan, $tahun),
+            $this->getKeuntunganJasaStat($bulan, $tahun),
+            $this->getKeuntunganSewaACStat($bulan, $tahun),
+
+            // === NET INCOME PER METODE PEMBAYARAN ===
             $this->getCashNetIncomeStat($bulan, $tahun),
             $this->getBCANetIncomeStat($bulan, $tahun),
             $this->getMandiriNetIncomeStat($bulan, $tahun),
@@ -61,7 +64,7 @@ class DashboardStatsWidget extends BaseWidget
 
     protected function getColumns(): int
     {
-        return 3; // Set 3 kolom untuk grid agar rapih (Cash, BCA, Mandiri)
+        return 3; // Grid 3 kolom
     }
 
 
@@ -165,10 +168,41 @@ class DashboardStatsWidget extends BaseWidget
 
         $total = $query->sum('pengeluaran');
 
-        return Stat::make('Pengeluaran Transaksi Produk', 'Rp ' . number_format($total, 0, ',', '.'))
+        return Stat::make('Pengeluaran Transaksi', 'Rp ' . number_format($total, 0, ',', '.'))
             ->description("Bulan $bulan/$tahun")
             ->descriptionIcon('heroicon-m-shopping-cart')
             ->color('warning');
+    }
+
+    private function getTotalPengeluaranStat($bulan, $tahun): Stat
+    {
+        // Hitung pengeluaran kantor
+        $queryKantor = PengeluaranKantor::query();
+        if ($bulan)
+            $queryKantor->whereMonth('tanggal', $bulan);
+        if ($tahun)
+            $queryKantor->whereYear('tanggal', $tahun);
+        $pengeluaranKantor = $queryKantor->sum('pengeluaran');
+
+        // Hitung pengeluaran transaksi
+        $queryTransaksi = PengeluaranTransaksiProduk::query();
+        if ($bulan)
+            $queryTransaksi->whereMonth('tanggal', $bulan);
+        if ($tahun)
+            $queryTransaksi->whereYear('tanggal', $tahun);
+        $pengeluaranTransaksi = $queryTransaksi->sum('pengeluaran');
+
+        // Total pengeluaran
+        $totalPengeluaran = $pengeluaranKantor + $pengeluaranTransaksi;
+
+        // Format untuk deskripsi
+        $kantorJuta = number_format($pengeluaranKantor / 1000000, 1);
+        $transaksiJuta = number_format($pengeluaranTransaksi / 1000000, 1);
+
+        return Stat::make('Total Pengeluaran', 'Rp ' . number_format($totalPengeluaran, 0, ',', '.'))
+            ->description("Kantor: {$kantorJuta}jt | Transaksi: {$transaksiJuta}jt")
+            ->descriptionIcon('heroicon-m-banknotes')
+            ->color('danger');
     }
 
     private function getTotalGajiSemuaKaryawanStat($bulan, $tahun): Stat
@@ -203,7 +237,7 @@ class DashboardStatsWidget extends BaseWidget
 
                         if ($bulan && $tahun) {
                             // Jika terakhir_aktif >= awal bulan filter, maka masih dihitung di bulan tersebut
-                            $firstDayOfMonth = Carbon::create($tahun, $bulan, 1)->startOfMonth();
+                            $firstDayOfMonth = Carbon::create((int) $tahun, (int) $bulan, 1)->startOfDay();
                             $subQ->where('terakhir_aktif', '>=', $firstDayOfMonth);
                         }
                     });
@@ -215,10 +249,10 @@ class DashboardStatsWidget extends BaseWidget
                 // Double check: jika tidak aktif dan terakhir_aktif sebelum bulan filter, skip
                 if ($record->status === 'tidak aktif' && $record->terakhir_aktif) {
                     $terakhirAktif = Carbon::parse($record->terakhir_aktif);
-                    $bulanFilter = Carbon::create($tahun, $bulan, 1);
+                    $bulanFilterStart = Carbon::create((int) $tahun, (int) $bulan, 1)->startOfDay();
 
                     // Jika terakhir aktif sebelum bulan filter, skip karyawan ini
-                    if ($terakhirAktif->isBefore($bulanFilter->startOfMonth())) {
+                    if ($terakhirAktif->isBefore($bulanFilterStart)) {
                         continue;
                     }
                 }
@@ -237,7 +271,7 @@ class DashboardStatsWidget extends BaseWidget
         }
 
         return Stat::make('Total Gaji Semua Karyawan', 'Rp ' . number_format($total, 0, ',', '.'))
-            ->description("Total gaji bulan $bulan/$tahun")
+            ->description("Total gaji karyawan aktif bulan $bulan/$tahun")
             ->descriptionIcon('heroicon-m-wallet')
             ->color('warning');
     }
@@ -347,6 +381,9 @@ class DashboardStatsWidget extends BaseWidget
     {
         // Hitung total pemasukan
         $pemasukan = 0;
+        $pemasukanPajak = 0;
+        $pemasukanNonPajak = 0;
+        $pemasukanSewaAC = 0;
 
         // Pajak
         $queryPajak = Pajak::query()->where('pembayaran', $paymentType);
@@ -354,7 +391,7 @@ class DashboardStatsWidget extends BaseWidget
             $queryPajak->whereMonth('tanggal', $bulan);
         if ($tahun)
             $queryPajak->whereYear('tanggal', $tahun);
-        $pemasukan += $queryPajak->with('details')->get()->sum(function ($transaksi) {
+        $pemasukanPajak = $queryPajak->with('details')->get()->sum(function ($transaksi) {
             return $transaksi->details->sum('total_harga_jual');
         });
 
@@ -364,7 +401,7 @@ class DashboardStatsWidget extends BaseWidget
             $queryNonPajak->whereMonth('tanggal', $bulan);
         if ($tahun)
             $queryNonPajak->whereYear('tanggal', $tahun);
-        $pemasukan += $queryNonPajak->with('details')->get()->sum(function ($transaksi) {
+        $pemasukanNonPajak = $queryNonPajak->with('details')->get()->sum(function ($transaksi) {
             return $transaksi->details->sum('total_harga_jual');
         });
 
@@ -374,10 +411,14 @@ class DashboardStatsWidget extends BaseWidget
             $querySewaAC->whereMonth('tanggal', $bulan);
         if ($tahun)
             $querySewaAC->whereYear('tanggal', $tahun);
-        $pemasukan += $querySewaAC->sum('pemasukan');
+        $pemasukanSewaAC = $querySewaAC->sum('pemasukan');
+
+        $pemasukan = $pemasukanPajak + $pemasukanNonPajak + $pemasukanSewaAC;
 
         // Hitung total pengeluaran
         $pengeluaran = 0;
+        $pengeluaranTransaksi = 0;
+        $pengeluaranKantor = 0;
 
         // Pengeluaran Transaksi Produk
         $queryPengTrans = PengeluaranTransaksiProduk::query()->where('pembayaran', $paymentType);
@@ -385,7 +426,7 @@ class DashboardStatsWidget extends BaseWidget
             $queryPengTrans->whereMonth('tanggal', $bulan);
         if ($tahun)
             $queryPengTrans->whereYear('tanggal', $tahun);
-        $pengeluaran += $queryPengTrans->sum('pengeluaran');
+        $pengeluaranTransaksi = $queryPengTrans->sum('pengeluaran');
 
         // Pengeluaran Kantor
         $queryPengKantor = PengeluaranKantor::query()->where('pembayaran', $paymentType);
@@ -393,18 +434,98 @@ class DashboardStatsWidget extends BaseWidget
             $queryPengKantor->whereMonth('tanggal', $bulan);
         if ($tahun)
             $queryPengKantor->whereYear('tanggal', $tahun);
-        $pengeluaran += $queryPengKantor->sum('pengeluaran');
+        $pengeluaranKantor = $queryPengKantor->sum('pengeluaran');
+
+        $pengeluaran = $pengeluaranTransaksi + $pengeluaranKantor;
 
         // Hitung net income
         $netIncome = $pemasukan - $pengeluaran;
 
-        // Format description
-        $pemasukanFormatted = number_format($pemasukan, 0, ',', '.');
-        $pengeluaranFormatted = number_format($pengeluaran, 0, ',', '.');
+        // Format deskripsi lebih ringkas
+        $pemasukanJuta = number_format($pemasukan / 1000000, 1);
+        $pengeluaranJuta = number_format($pengeluaran / 1000000, 1);
+
+        $description = "Masuk: Rp {$pemasukanJuta}jt | Keluar: Rp {$pengeluaranJuta}jt";
+
+        // Chart data untuk visualisasi (optional - bisa ditampilkan sebagai mini chart)
+        $chartData = [
+            (int) ($pemasukanPajak / 1000000),
+            (int) ($pemasukanNonPajak / 1000000),
+            (int) ($pemasukanSewaAC / 1000000),
+            -(int) ($pengeluaranTransaksi / 1000000),
+            -(int) ($pengeluaranKantor / 1000000),
+        ];
 
         return Stat::make("Net Income $paymentType", 'Rp ' . number_format($netIncome, 0, ',', '.'))
-            ->description("Pemasukan: Rp $pemasukanFormatted | Pengeluaran: Rp $pengeluaranFormatted")
+            ->description($description)
             ->descriptionIcon($icon)
+            ->chart($chartData) // Mini chart untuk visualisasi
             ->color($netIncome >= 0 ? $color : 'danger');
     }
+
+    // === TOTAL SALDO ALL-TIME (Tidak terpengaruh filter bulan) ===
+
+    private function getTotalSaldoCashStat(): Stat
+    {
+        return $this->getTotalSaldoByPayment('Cash', 'success', 'heroicon-m-banknotes');
+    }
+
+    private function getTotalSaldoBCAStat(): Stat
+    {
+        return $this->getTotalSaldoByPayment('BCA', 'info', 'heroicon-m-credit-card');
+    }
+
+    private function getTotalSaldoMandiriStat(): Stat
+    {
+        return $this->getTotalSaldoByPayment('Mandiri', 'warning', 'heroicon-m-credit-card');
+    }
+
+    private function getTotalSaldoByPayment($paymentType, $color, $icon): Stat
+    {
+        // Hitung total ALL-TIME pemasukan
+        $pemasukan = 0;
+
+        // Pajak (all-time)
+        $pemasukan += Pajak::where('pembayaran', $paymentType)
+            ->with('details')
+            ->get()
+            ->sum(function ($transaksi) {
+                return $transaksi->details->sum('total_harga_jual');
+            });
+
+        // Non Pajak (all-time)
+        $pemasukan += NonPajak::where('pembayaran', $paymentType)
+            ->with('details')
+            ->get()
+            ->sum(function ($transaksi) {
+                return $transaksi->details->sum('total_harga_jual');
+            });
+
+        // Sewa AC (all-time)
+        $pemasukan += SewaAC::where('pembayaran', $paymentType)
+            ->sum('pemasukan');
+
+        // Hitung total ALL-TIME pengeluaran
+        $pengeluaran = 0;
+
+        // Pengeluaran Transaksi (all-time)
+        $pengeluaran += PengeluaranTransaksiProduk::where('pembayaran', $paymentType)
+            ->sum('pengeluaran');
+
+        // Pengeluaran Kantor (all-time)
+        $pengeluaran += PengeluaranKantor::where('pembayaran', $paymentType)
+            ->sum('pengeluaran');
+
+        // Total Saldo
+        $totalSaldo = $pemasukan - $pengeluaran;
+
+        // Format untuk jutaan
+        $saldoJuta = number_format($totalSaldo / 1000000, 1);
+
+        return Stat::make("💰 Saldo $paymentType", 'Rp ' . number_format($totalSaldo, 0, ',', '.'))
+            ->description("Total keseluruhan: Rp {$saldoJuta}jt")
+            ->descriptionIcon($icon)
+            ->color($totalSaldo >= 0 ? $color : 'danger');
+    }
+
 }

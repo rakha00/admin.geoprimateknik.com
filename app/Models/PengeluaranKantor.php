@@ -10,8 +10,9 @@ class PengeluaranKantor extends Model
     use HasFactory;
 
     protected $fillable = [
-        'tanggal',        
-        'pengeluaran',       
-        'remarks',      
+        'tanggal',
+        'pengeluaran',
+        'remarks',
+        'pembayaran',
     ];
 }

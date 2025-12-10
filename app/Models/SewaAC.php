@@ -9,6 +9,6 @@ class SewaAC extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['tanggal', 'pemasukan', 'pengeluaran', 'keterangan_pemasukan','keterangan_pengeluaran'];
+    protected $fillable = ['tanggal', 'pemasukan', 'pengeluaran', 'keterangan_pemasukan', 'keterangan_pengeluaran', 'pembayaran'];
 
 }
