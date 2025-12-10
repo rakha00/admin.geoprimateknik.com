@@ -14,6 +14,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\Concerns\CanPoll; // Optional jika perlu auto-refresh
 use Filament\Forms\Components\Select;
 use Filament\Widgets\Concerns\InteractsWithPageFilters; // ✅ Ini yang benar
+use Carbon\Carbon;
 
 
 class DashboardStatsWidget extends BaseWidget
@@ -51,30 +52,10 @@ class DashboardStatsWidget extends BaseWidget
             $this->getTotalKeuntunganBersihStat($bulan, $tahun),
             $this->getTotalGajiSemuaKaryawanStat($bulan, $tahun),
 
-            // Pajak Stats
-            $this->getPajakCashStat($bulan, $tahun),
-            $this->getPajakBCAStat($bulan, $tahun),
-            $this->getPajakMandiriStat($bulan, $tahun),
-
-            // Non Pajak Stats
-            $this->getNonPajakCashStat($bulan, $tahun),
-            $this->getNonPajakBCAStat($bulan, $tahun),
-            $this->getNonPajakMandiriStat($bulan, $tahun),
-
-            // Pengeluaran Kantor Stats
-            $this->getPengeluaranKantorCashStat($bulan, $tahun),
-            $this->getPengeluaranKantorBCAStat($bulan, $tahun),
-            $this->getPengeluaranKantorMandiriStat($bulan, $tahun),
-
-            // Pengeluaran Transaksi Produk Stats
-            $this->getPengeluaranTransaksiProdukCashStat($bulan, $tahun),
-            $this->getPengeluaranTransaksiProdukBCAStat($bulan, $tahun),
-            $this->getPengeluaranTransaksiProdukMandiriStat($bulan, $tahun),
-
-            // Sewa AC Stats
-            $this->getSewaACCashStat($bulan, $tahun),
-            $this->getSewaACBCAStat($bulan, $tahun),
-            $this->getSewaACMandiriStat($bulan, $tahun),
+            // Widget Metode Pembayaran - Net Income (Pemasukan - Pengeluaran)
+            $this->getCashNetIncomeStat($bulan, $tahun),
+            $this->getBCANetIncomeStat($bulan, $tahun),
+            $this->getMandiriNetIncomeStat($bulan, $tahun),
         ];
     }
 
@@ -184,6 +165,10 @@ class DashboardStatsWidget extends BaseWidget
 
         $total = $query->sum('pengeluaran');
 
+        return Stat::make('Pengeluaran Transaksi Produk', 'Rp ' . number_format($total, 0, ',', '.'))
+            ->description("Bulan $bulan/$tahun")
+            ->descriptionIcon('heroicon-m-shopping-cart')
+            ->color('warning');
     }
 
     private function getTotalGajiSemuaKaryawanStat($bulan, $tahun): Stat
@@ -199,7 +184,8 @@ class DashboardStatsWidget extends BaseWidget
         $total = 0;
 
         foreach ($models as $model) {
-            $records = $model::with([
+            // Filter karyawan yang aktif atau yang terakhir_aktif masih di bulan/tahun yang sama atau setelahnya
+            $query = $model::with([
                 'penghasilanDetails' => function ($q) use ($bulan, $tahun) {
                     if ($bulan) {
                         $q->whereMonth('tanggal', $bulan);
@@ -208,9 +194,35 @@ class DashboardStatsWidget extends BaseWidget
                         $q->whereYear('tanggal', $tahun);
                     }
                 }
-            ])->get();
+            ])->where(function ($q) use ($bulan, $tahun) {
+                // Karyawan yang aktif
+                $q->where('status', 'aktif')
+                    // ATAU karyawan tidak aktif tapi terakhir_aktif di bulan/tahun filter atau setelahnya
+                    ->orWhere(function ($subQ) use ($bulan, $tahun) {
+                        $subQ->where('status', 'tidak aktif');
+
+                        if ($bulan && $tahun) {
+                            // Jika terakhir_aktif >= awal bulan filter, maka masih dihitung di bulan tersebut
+                            $firstDayOfMonth = Carbon::create($tahun, $bulan, 1)->startOfMonth();
+                            $subQ->where('terakhir_aktif', '>=', $firstDayOfMonth);
+                        }
+                    });
+            });
+
+            $records = $query->get();
 
             foreach ($records as $record) {
+                // Double check: jika tidak aktif dan terakhir_aktif sebelum bulan filter, skip
+                if ($record->status === 'tidak aktif' && $record->terakhir_aktif) {
+                    $terakhirAktif = Carbon::parse($record->terakhir_aktif);
+                    $bulanFilter = Carbon::create($tahun, $bulan, 1);
+
+                    // Jika terakhir aktif sebelum bulan filter, skip karyawan ini
+                    if ($terakhirAktif->isBefore($bulanFilter->startOfMonth())) {
+                        continue;
+                    }
+                }
+
                 $penghasilan = $record->penghasilanDetails;
 
                 $gajiPokok = $record->gaji_pokok ?? 0;
@@ -315,167 +327,84 @@ class DashboardStatsWidget extends BaseWidget
         return $query->sum('pengeluaran');
     }
 
-    // Pajak Stats
-    private function getPajakCashStat($bulan, $tahun): Stat
+    // Widget Net Income per Metode Pembayaran
+    private function getCashNetIncomeStat($bulan, $tahun): Stat
     {
-        return $this->getPajakStatByPayment($bulan, $tahun, 'Cash', 'success', 'heroicon-m-banknotes');
+        return $this->getNetIncomeStatByPayment($bulan, $tahun, 'Cash', 'success', 'heroicon-m-banknotes');
     }
 
-    private function getPajakBCAStat($bulan, $tahun): Stat
+    private function getBCANetIncomeStat($bulan, $tahun): Stat
     {
-        return $this->getPajakStatByPayment($bulan, $tahun, 'BCA', 'info', 'heroicon-m-credit-card');
+        return $this->getNetIncomeStatByPayment($bulan, $tahun, 'BCA', 'info', 'heroicon-m-credit-card');
     }
 
-    private function getPajakMandiriStat($bulan, $tahun): Stat
+    private function getMandiriNetIncomeStat($bulan, $tahun): Stat
     {
-        return $this->getPajakStatByPayment($bulan, $tahun, 'Mandiri', 'warning', 'heroicon-m-credit-card');
+        return $this->getNetIncomeStatByPayment($bulan, $tahun, 'Mandiri', 'warning', 'heroicon-m-credit-card');
     }
 
-    private function getPajakStatByPayment($bulan, $tahun, $paymentType, $color, $icon): Stat
+    private function getNetIncomeStatByPayment($bulan, $tahun, $paymentType, $color, $icon): Stat
     {
-        $query = Pajak::query()->where('pembayaran', $paymentType);
+        // Hitung total pemasukan
+        $pemasukan = 0;
+
+        // Pajak
+        $queryPajak = Pajak::query()->where('pembayaran', $paymentType);
         if ($bulan)
-            $query->whereMonth('tanggal', $bulan);
+            $queryPajak->whereMonth('tanggal', $bulan);
         if ($tahun)
-            $query->whereYear('tanggal', $tahun);
-
-        $total = $query->with('details')->get()->sum(function ($transaksi) {
+            $queryPajak->whereYear('tanggal', $tahun);
+        $pemasukan += $queryPajak->with('details')->get()->sum(function ($transaksi) {
             return $transaksi->details->sum('total_harga_jual');
         });
 
-        return Stat::make("Pajak $paymentType", 'Rp ' . number_format($total, 0, ',', '.'))
-            ->description("Total Pajak $paymentType $bulan/$tahun")
-            ->descriptionIcon($icon)
-            ->color($color);
-    }
-
-    // Non Pajak Stats
-    private function getNonPajakCashStat($bulan, $tahun): Stat
-    {
-        return $this->getNonPajakStatByPayment($bulan, $tahun, 'Cash', 'success', 'heroicon-m-banknotes');
-    }
-
-    private function getNonPajakBCAStat($bulan, $tahun): Stat
-    {
-        return $this->getNonPajakStatByPayment($bulan, $tahun, 'BCA', 'info', 'heroicon-m-credit-card');
-    }
-
-    private function getNonPajakMandiriStat($bulan, $tahun): Stat
-    {
-        return $this->getNonPajakStatByPayment($bulan, $tahun, 'Mandiri', 'warning', 'heroicon-m-credit-card');
-    }
-
-    private function getNonPajakStatByPayment($bulan, $tahun, $paymentType, $color, $icon): Stat
-    {
-        $query = NonPajak::query()->where('pembayaran', $paymentType);
+        // Non Pajak
+        $queryNonPajak = NonPajak::query()->where('pembayaran', $paymentType);
         if ($bulan)
-            $query->whereMonth('tanggal', $bulan);
+            $queryNonPajak->whereMonth('tanggal', $bulan);
         if ($tahun)
-            $query->whereYear('tanggal', $tahun);
-
-        $total = $query->with('details')->get()->sum(function ($transaksi) {
+            $queryNonPajak->whereYear('tanggal', $tahun);
+        $pemasukan += $queryNonPajak->with('details')->get()->sum(function ($transaksi) {
             return $transaksi->details->sum('total_harga_jual');
         });
 
-        return Stat::make("Non Pajak $paymentType", 'Rp ' . number_format($total, 0, ',', '.'))
-            ->description("Total Non Pajak $paymentType $bulan/$tahun")
-            ->descriptionIcon($icon)
-            ->color($color);
-    }
-
-    // Pengeluaran Kantor Stats
-    private function getPengeluaranKantorCashStat($bulan, $tahun): Stat
-    {
-        return $this->getPengeluaranKantorStatByPayment($bulan, $tahun, 'Cash', 'success', 'heroicon-m-banknotes');
-    }
-
-    private function getPengeluaranKantorBCAStat($bulan, $tahun): Stat
-    {
-        return $this->getPengeluaranKantorStatByPayment($bulan, $tahun, 'BCA', 'info', 'heroicon-m-credit-card');
-    }
-
-    private function getPengeluaranKantorMandiriStat($bulan, $tahun): Stat
-    {
-        return $this->getPengeluaranKantorStatByPayment($bulan, $tahun, 'Mandiri', 'warning', 'heroicon-m-credit-card');
-    }
-
-    private function getPengeluaranKantorStatByPayment($bulan, $tahun, $paymentType, $color, $icon): Stat
-    {
-        $query = PengeluaranKantor::query()->where('pembayaran', $paymentType);
+        // Sewa AC
+        $querySewaAC = SewaAC::query()->where('pembayaran', $paymentType);
         if ($bulan)
-            $query->whereMonth('tanggal', $bulan);
+            $querySewaAC->whereMonth('tanggal', $bulan);
         if ($tahun)
-            $query->whereYear('tanggal', $tahun);
+            $querySewaAC->whereYear('tanggal', $tahun);
+        $pemasukan += $querySewaAC->sum('pemasukan');
 
-        $total = $query->sum('pengeluaran');
+        // Hitung total pengeluaran
+        $pengeluaran = 0;
 
-        return Stat::make("Peng. Kantor $paymentType", 'Rp ' . number_format($total, 0, ',', '.'))
-            ->description("Total Peng. Kantor $paymentType $bulan/$tahun")
-            ->descriptionIcon($icon)
-            ->color($color);
-    }
-
-    // Pengeluaran Transaksi Produk Stats
-    private function getPengeluaranTransaksiProdukCashStat($bulan, $tahun): Stat
-    {
-        return $this->getPengeluaranTransaksiProdukStatByPayment($bulan, $tahun, 'Cash', 'success', 'heroicon-m-banknotes');
-    }
-
-    private function getPengeluaranTransaksiProdukBCAStat($bulan, $tahun): Stat
-    {
-        return $this->getPengeluaranTransaksiProdukStatByPayment($bulan, $tahun, 'BCA', 'info', 'heroicon-m-credit-card');
-    }
-
-    private function getPengeluaranTransaksiProdukMandiriStat($bulan, $tahun): Stat
-    {
-        return $this->getPengeluaranTransaksiProdukStatByPayment($bulan, $tahun, 'Mandiri', 'warning', 'heroicon-m-credit-card');
-    }
-
-    private function getPengeluaranTransaksiProdukStatByPayment($bulan, $tahun, $paymentType, $color, $icon): Stat
-    {
-        $query = PengeluaranTransaksiProduk::query()->where('pembayaran', $paymentType);
+        // Pengeluaran Transaksi Produk
+        $queryPengTrans = PengeluaranTransaksiProduk::query()->where('pembayaran', $paymentType);
         if ($bulan)
-            $query->whereMonth('tanggal', $bulan);
+            $queryPengTrans->whereMonth('tanggal', $bulan);
         if ($tahun)
-            $query->whereYear('tanggal', $tahun);
+            $queryPengTrans->whereYear('tanggal', $tahun);
+        $pengeluaran += $queryPengTrans->sum('pengeluaran');
 
-        $total = $query->sum('pengeluaran');
-
-        return Stat::make("Peng. Transaksi $paymentType", 'Rp ' . number_format($total, 0, ',', '.'))
-            ->description("Total Peng. Transaksi $paymentType $bulan/$tahun")
-            ->descriptionIcon($icon)
-            ->color($color);
-    }
-
-    // Sewa AC Stats
-    private function getSewaACCashStat($bulan, $tahun): Stat
-    {
-        return $this->getSewaACStatByPayment($bulan, $tahun, 'Cash', 'success', 'heroicon-m-banknotes');
-    }
-
-    private function getSewaACBCAStat($bulan, $tahun): Stat
-    {
-        return $this->getSewaACStatByPayment($bulan, $tahun, 'BCA', 'info', 'heroicon-m-credit-card');
-    }
-
-    private function getSewaACMandiriStat($bulan, $tahun): Stat
-    {
-        return $this->getSewaACStatByPayment($bulan, $tahun, 'Mandiri', 'warning', 'heroicon-m-credit-card');
-    }
-
-    private function getSewaACStatByPayment($bulan, $tahun, $paymentType, $color, $icon): Stat
-    {
-        $query = SewaAC::query()->where('pembayaran', $paymentType);
+        // Pengeluaran Kantor
+        $queryPengKantor = PengeluaranKantor::query()->where('pembayaran', $paymentType);
         if ($bulan)
-            $query->whereMonth('tanggal', $bulan);
+            $queryPengKantor->whereMonth('tanggal', $bulan);
         if ($tahun)
-            $query->whereYear('tanggal', $tahun);
+            $queryPengKantor->whereYear('tanggal', $tahun);
+        $pengeluaran += $queryPengKantor->sum('pengeluaran');
 
-        $total = $query->sum('pemasukan'); // Asumsi yang dihitung pemasukan
+        // Hitung net income
+        $netIncome = $pemasukan - $pengeluaran;
 
-        return Stat::make("Sewa AC $paymentType", 'Rp ' . number_format($total, 0, ',', '.'))
-            ->description("Total Sewa AC $paymentType $bulan/$tahun")
+        // Format description
+        $pemasukanFormatted = number_format($pemasukan, 0, ',', '.');
+        $pengeluaranFormatted = number_format($pengeluaran, 0, ',', '.');
+
+        return Stat::make("Net Income $paymentType", 'Rp ' . number_format($netIncome, 0, ',', '.'))
+            ->description("Pemasukan: Rp $pemasukanFormatted | Pengeluaran: Rp $pengeluaranFormatted")
             ->descriptionIcon($icon)
-            ->color($color);
+            ->color($netIncome >= 0 ? $color : 'danger');
     }
 }
