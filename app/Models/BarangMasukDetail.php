@@ -42,11 +42,13 @@ class BarangMasukDetail extends Model
         static::saved(function ($detail) {
             $detail->syncUtang();
             $detail->updateSparepartStock();
+            $detail->updateUnitAcStock();
         });
 
         static::deleted(function ($detail) {
             $detail->syncUtang();
             $detail->updateSparepartStock();
+            $detail->updateUnitAcStock();
         });
     }
 
@@ -65,7 +67,7 @@ class BarangMasukDetail extends Model
         return $this->belongsTo(Sparepart::class);
     }
 
-    protected function updateSparepartStock()
+    public function updateSparepartStock()
     {
         // Handle current sparepart
         if ($this->sparepart_id) {
@@ -79,21 +81,43 @@ class BarangMasukDetail extends Model
         }
     }
 
+    public function updateUnitAcStock()
+    {
+        if ($this->unit_ac_id) {
+            $unit = \App\Models\UnitAc::find($this->unit_ac_id);
+            if ($unit) {
+                $unit->recalculateStock();
+            }
+        }
+
+        $originalId = $this->getOriginal('unit_ac_id');
+        if ($originalId && $originalId != $this->unit_ac_id) {
+            $unit = \App\Models\UnitAc::find($originalId);
+            if ($unit) {
+                $unit->recalculateStock();
+            }
+        }
+    }
+
     protected function recalculateStock($sparepartId)
     {
         $sparepart = \App\Models\Sparepart::find($sparepartId);
         if ($sparepart) {
-            $stokMasuk = \App\Models\BarangMasukDetail::where('sparepart_id', $sparepartId)->sum('jumlah_barang_masuk');
+            $stokMasuk = \App\Models\BarangMasukDetail::where('sparepart_id', $sparepartId)
+                ->whereHas('barangMasuk', function ($q) {
+                    $q->where('status', 'Selesai');
+                })
+                ->sum('jumlah_barang_masuk');
             $sparepart->stok_masuk = $stokMasuk;
             $sparepart->stok_akhir = $sparepart->stock_awal + $stokMasuk - $sparepart->stok_keluar;
             $sparepart->save();
         }
     }
 
-    protected function syncUtang()
+    public function syncUtang()
     {
         $barangMasuk = $this->barangMasuk;
-        if (! $barangMasuk) {
+        if (!$barangMasuk || $barangMasuk->status !== 'Selesai') {
             return;
         }
 

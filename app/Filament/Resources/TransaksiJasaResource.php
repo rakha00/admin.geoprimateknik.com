@@ -30,7 +30,7 @@ class TransaksiJasaResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Transaksi Jasa';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 5;
 
     protected static ?string $recordTitleAttribute = 'no_invoice';
 
@@ -45,7 +45,7 @@ class TransaksiJasaResource extends Resource
                     ->required() // User said nullable fields but usually date is required for invoice gen. User said "biarkan semua nullable". I will make it nullable but logic needs date. If null, maybe no invoice num?
                     ->reactive()
                     ->afterStateUpdated(function ($state, $get, $set) {
-                        if (! $state) {
+                        if (!$state) {
                             return;
                         }
                         $codes = self::generateCode($state);
@@ -86,14 +86,14 @@ class TransaksiJasaResource extends Resource
                     ->numeric()
                     ->prefix('Rp')
                     ->live(true)
-                    ->afterStateUpdated(fn ($state, $get, $set) => $set('total_keuntungan_jasa', ($state ?? 0) - ($get('total_pengeluaran_jasa') ?? 0))),
+                    ->afterStateUpdated(fn($state, $get, $set) => $set('total_keuntungan_jasa', ($state ?? 0) - ($get('total_pengeluaran_jasa') ?? 0))),
 
                 TextInput::make('total_pengeluaran_jasa')
                     ->label('Total Pengeluaran Jasa')
                     ->numeric()
                     ->prefix('Rp')
                     ->live(true)
-                    ->afterStateUpdated(fn ($state, $get, $set) => $set('total_keuntungan_jasa', ($get('total_pendapatan_jasa') ?? 0) - ($state ?? 0))),
+                    ->afterStateUpdated(fn($state, $get, $set) => $set('total_keuntungan_jasa', ($get('total_pendapatan_jasa') ?? 0) - ($state ?? 0))),
 
                 TextInput::make('total_keuntungan_jasa')
                     ->label('Total Keuntungan Jasa')
@@ -130,11 +130,11 @@ class TransaksiJasaResource extends Resource
                         return $query
                             ->when(
                                 $data['from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('tanggal_transaksi', '>=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('tanggal_transaksi', '>=', $date),
                             )
                             ->when(
                                 $data['until'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('tanggal_transaksi', '<=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('tanggal_transaksi', '<=', $date),
                             );
                     }),
             ])
@@ -152,7 +152,7 @@ class TransaksiJasaResource extends Resource
                             ])
                             ->required(),
                     ])
-                    ->action(fn (TransaksiJasa $record, array $data) => redirect()->to(
+                    ->action(fn(TransaksiJasa $record, array $data) => redirect()->to(
                         route(match ($data['type']) {
                             'invoice' => 'transaksi-jasa.print.invoice',
                             'surat_jalan' => 'transaksi-jasa.print.surat-jalan',

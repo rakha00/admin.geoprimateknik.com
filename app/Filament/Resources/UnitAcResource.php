@@ -79,37 +79,33 @@ class UnitAcResource extends Resource
                     ->searchable(),
                 TextColumn::make('harga_modal')
                     ->label('Harga Modal')
-                    ->formatStateUsing(fn ($state): string => number_format($state, 0, ',', '.')),
-
-                TextColumn::make('stock_akhir')
-                    ->label('Stock Akhir')
-                    ->numeric()
-                    ->sortable(),
-
+                    ->formatStateUsing(fn($state): string => number_format($state, 0, ',', '.')),
                 // 1) Stock Awal
                 TextColumn::make('stock_awal')
                     ->label('Stock Awal')
-                    ->visible(fn () => auth()->user()->level == 1),
+                    ->visible(fn() => auth()->user()->level == 1),
 
                 // 2) Stock Masuk = SUM(jumlah_barang_masuk)
                 TextColumn::make('stock_masuk')
                     ->label('Stock Masuk')
-                    ->visible(fn () => auth()->user()->level == 1)
+                    ->visible(fn() => auth()->user()->level == 1)
                     ->getStateUsing(
-                        fn (UnitAc $record): int => $record->barangMasukDetails()->sum('jumlah_barang_masuk')
+                        fn(UnitAc $record): int => $record->barangMasukDetails()
+                            ->whereHas('barangMasuk', function ($q) {
+                                $q->where('status', 'Selesai');
+                            })
+                            ->sum('jumlah_barang_masuk')
                     ),
 
                 // 3) Stock Keluar = SUM(jumlah_keluar)
                 TextColumn::make('stok_keluar')
                     ->label('Stock Keluar')
-                    ->visible(fn () => auth()->user()->level == 1)
-                    ->numeric()
+                    ->visible(fn() => auth()->user()->level == 1)
                     ->sortable(),
 
                 // 4) Stock Akhir = Awal + Masuk − Keluar
                 TextColumn::make('stok_akhir')
                     ->label('Stock Akhir')
-                    ->numeric()
                     ->sortable(),
 
             ])
@@ -118,7 +114,7 @@ class UnitAcResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make()
-                    ->visible(fn () => auth()->user()->level == 1),
+                    ->visible(fn() => auth()->user()->level == 1),
             ]);
     }
 

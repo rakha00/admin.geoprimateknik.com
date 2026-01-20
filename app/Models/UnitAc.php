@@ -74,7 +74,11 @@ class UnitAc extends Model
     {
         // 1. Hitung total masuk dari BarangMasukDetail
         //    (Asumsi: relasi barangMasukDetails sudah ada & benar)
-        $totalMasuk = $this->barangMasukDetails()->sum('jumlah_barang_masuk');
+        $totalMasuk = $this->barangMasukDetails()
+            ->whereHas('barangMasuk', function ($q) {
+                $q->where('status', 'Selesai');
+            })
+            ->sum('jumlah_barang_masuk');
 
         // 2. Hitung total keluar dari:
         //    - TransaksiProdukDetail (jika masih dipakai)
