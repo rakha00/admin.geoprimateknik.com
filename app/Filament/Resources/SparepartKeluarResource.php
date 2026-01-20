@@ -27,6 +27,8 @@ class SparepartKeluarResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-arrow-up-on-square-stack';
     protected static ?string $navigationGroup = 'Transaksi';
     protected static ?string $navigationLabel = 'Sparepart Keluar';
+    protected static ?string $pluralModelLabel = 'Sparepart Keluar';
+    protected static ?int $navigationSort = 5;
     protected static ?string $recordTitleAttribute = 'no_invoice';
 
     public static function form(Form $form): Form

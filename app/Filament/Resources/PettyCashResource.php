@@ -27,6 +27,8 @@ class PettyCashResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
     protected static ?string $navigationLabel = 'Petty Cash';
     protected static ?string $navigationGroup = 'Keuangan';
+    protected static ?string $pluralModelLabel = 'Petty Cash';
+    protected static ?int $navigationSort = 3;
 
     public static function canViewAny(): bool
     {

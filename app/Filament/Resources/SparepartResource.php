@@ -17,6 +17,8 @@ class SparepartResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-cog';
     protected static ?string $navigationLabel = 'Sparepart';
     protected static ?string $navigationGroup = 'Inventori';
+    protected static ?string $pluralModelLabel = 'Sparepart';
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {

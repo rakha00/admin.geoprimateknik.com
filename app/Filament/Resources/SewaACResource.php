@@ -23,6 +23,8 @@ class SewaACResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-clock';
     protected static ?string $navigationLabel = 'Sewa AC';
     protected static ?string $navigationGroup = 'Transaksi';
+    protected static ?string $pluralModelLabel = 'Sewa AC';
+    protected static ?int $navigationSort = 4;
 
     public static function canViewAny(): bool
     {

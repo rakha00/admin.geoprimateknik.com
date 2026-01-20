@@ -50,6 +50,14 @@ class AdminPanelProvider extends PanelProvider
                 AccountWidget::class,
                 FilamentInfoWidget::class,
             ])
+            ->navigationGroups([
+                'Transaksi',
+                'Keuangan',
+                'Inventori',
+                'Karyawan',
+                'Laporan',
+                'Master Data',
+            ])
 
             // Middleware & Auth
             ->middleware([

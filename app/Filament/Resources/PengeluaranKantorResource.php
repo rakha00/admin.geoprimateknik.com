@@ -20,6 +20,8 @@ class PengeluaranKantorResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-calculator';
     protected static ?string $navigationGroup = 'Keuangan';
     protected static ?string $navigationLabel = 'Pengeluaran Kantor';
+    protected static ?string $pluralModelLabel = 'Pengeluaran Kantor';
+    protected static ?int $navigationSort = 4;
 
     public static function canViewAny(): bool
     {

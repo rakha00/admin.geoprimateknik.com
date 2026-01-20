@@ -19,7 +19,9 @@ class TeknisiResource extends Resource
     protected static ?string $model = Teknisi::class;
     protected static ?string $navigationIcon = 'heroicon-o-briefcase';
     protected static ?string $navigationLabel = 'Teknisi';
+    protected static ?string $pluralModelLabel = 'Teknisi';
     protected static ?string $navigationGroup = 'Karyawan';
+    protected static ?int $navigationSort = 2;
 
     public static function canViewAny(): bool
     {

@@ -19,6 +19,8 @@ class TokoResource extends Resource
     protected static ?string $navigationGroup = 'Master Data';
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
     protected static ?string $navigationLabel = 'Toko';
+    protected static ?string $pluralModelLabel = 'Toko';
+    protected static ?int $navigationSort = 2;
 
     public static function canViewAny(): bool
     {

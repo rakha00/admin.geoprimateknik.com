@@ -19,8 +19,10 @@ class SalesResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
     protected static ?string $navigationLabel = 'Sales';
+    protected static ?string $pluralModelLabel = 'Sales';
     protected static ?string $recordTitleAttribute = 'nama_sales';
     protected static ?string $navigationGroup = 'Karyawan';
+    protected static ?int $navigationSort = 1;
 
     public static function canViewAny(): bool
     {

@@ -21,7 +21,9 @@ class HelperResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user-plus';
     protected static ?string $navigationLabel = 'Helper';
+    protected static ?string $pluralModelLabel = 'Helper';
     protected static ?string $navigationGroup = 'Karyawan';
+    protected static ?int $navigationSort = 3;
 
     public static function canViewAny(): bool
     {

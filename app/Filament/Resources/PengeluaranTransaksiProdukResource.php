@@ -22,6 +22,8 @@ class PengeluaranTransaksiProdukResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
     protected static ?string $navigationGroup = 'Keuangan';
     protected static ?string $navigationLabel = 'Pengeluaran Transaksi';
+    protected static ?string $pluralModelLabel = 'Pengeluaran Transaksi';
+    protected static ?int $navigationSort = 5;
 
     public static function canViewAny(): bool
     {

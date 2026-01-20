@@ -20,6 +20,8 @@ class KonsumenJasaResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationLabel = 'Konsumen Jasa';
     protected static ?string $navigationGroup = 'Master Data';
+    protected static ?string $pluralModelLabel = 'Konsumen Jasa';
+    protected static ?int $navigationSort = 1;
     protected static ?string $pluralLabel = 'Konsumen Jasa';
     protected static ?string $modelLabel = 'Konsumen Jasa';
 

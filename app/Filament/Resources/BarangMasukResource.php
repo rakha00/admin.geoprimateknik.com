@@ -20,6 +20,8 @@ class BarangMasukResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-arrow-down-on-square-stack';
     protected static ?string $navigationLabel = 'Barang Masuk';
     protected static ?string $navigationGroup = 'Inventori';
+    protected static ?string $pluralModelLabel = 'Barang Masuk';
+    protected static ?int $navigationSort = 1;
 
     public static function canViewAny(): bool
     {

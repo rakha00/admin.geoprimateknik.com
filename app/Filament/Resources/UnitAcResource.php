@@ -18,6 +18,8 @@ class UnitAcResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-cube';
     protected static ?string $navigationLabel = 'Unit AC';
     protected static ?string $navigationGroup = 'Inventori';
+    protected static ?string $pluralModelLabel = 'Unit AC';
+    protected static ?int $navigationSort = 2;
 
     public static function canCreate(): bool
     {

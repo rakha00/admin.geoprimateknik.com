@@ -22,6 +22,8 @@ class GudangResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
     protected static ?string $navigationLabel = 'Gudang';
     protected static ?string $navigationGroup = 'Inventori';
+    protected static ?string $pluralModelLabel = 'Gudang';
+    protected static ?int $navigationSort = 4;
 
     public static function canViewAny(): bool
     {

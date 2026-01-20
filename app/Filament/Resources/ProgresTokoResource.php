@@ -19,6 +19,8 @@ class ProgresTokoResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
     protected static ?string $navigationLabel = 'Progres Toko';
     protected static ?string $navigationGroup = 'Laporan';
+    protected static ?string $pluralModelLabel = 'Progres Toko';
+    protected static ?int $navigationSort = 2;
 
     // public static function shouldRegisterNavigation(): bool
     // {

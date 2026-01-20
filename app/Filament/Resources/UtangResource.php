@@ -23,6 +23,8 @@ class UtangResource extends Resource
     protected static ?string $navigationGroup = 'Keuangan';
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
     protected static ?string $navigationLabel = 'Utang';
+    protected static ?string $pluralModelLabel = 'Utang';
+    protected static ?int $navigationSort = 2;
 
     public static function canViewAny(): bool
     {

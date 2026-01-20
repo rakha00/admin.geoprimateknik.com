@@ -17,6 +17,8 @@ class ProgressMerkResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-tag';
     protected static ?string $navigationLabel = 'Progres Merk';
     protected static ?string $navigationGroup = 'Laporan';
+    protected static ?string $pluralModelLabel = 'Progres Merk';
+    protected static ?int $navigationSort = 3;
 
     public static function canCreate(): bool
     {

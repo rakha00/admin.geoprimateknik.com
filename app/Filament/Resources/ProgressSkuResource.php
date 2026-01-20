@@ -16,6 +16,8 @@ class ProgressSKUResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-qr-code';
     protected static ?string $navigationLabel = 'Progres SKU';
     protected static ?string $navigationGroup = 'Laporan';
+    protected static ?string $pluralModelLabel = 'Progres SKU';
+    protected static ?int $navigationSort = 4;
 
 
     public static function canCreate(): bool

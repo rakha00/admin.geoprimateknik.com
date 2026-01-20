@@ -21,7 +21,9 @@ class StaffResource extends Resource
     protected static ?string $model = Staff::class;
     protected static ?string $navigationIcon = 'heroicon-o-user';
     protected static ?string $navigationLabel = 'Staff';
+    protected static ?string $pluralModelLabel = 'Staff';
     protected static ?string $navigationGroup = 'Karyawan';
+    protected static ?int $navigationSort = 4;
 
     public static function canViewAny(): bool
     {

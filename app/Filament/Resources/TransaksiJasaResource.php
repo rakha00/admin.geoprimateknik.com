@@ -27,6 +27,8 @@ class TransaksiJasaResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
     protected static ?string $navigationGroup = 'Transaksi';
     protected static ?string $navigationLabel = 'Transaksi Jasa';
+    protected static ?string $pluralModelLabel = 'Transaksi Jasa';
+    protected static ?int $navigationSort = 1;
     protected static ?string $recordTitleAttribute = 'no_invoice';
 
     public static function form(Form $form): Form

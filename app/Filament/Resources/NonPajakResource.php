@@ -28,6 +28,8 @@ class NonPajakResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
     protected static ?string $navigationGroup = 'Transaksi';
     protected static ?string $navigationLabel = 'Transaksi Non-Pajak';
+    protected static ?string $pluralModelLabel = 'Transaksi Non-Pajak';
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'no_invoice_non_pajak';
 
