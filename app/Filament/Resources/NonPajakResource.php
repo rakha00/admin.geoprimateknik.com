@@ -51,7 +51,7 @@ class NonPajakResource extends Resource
                 ->required()
                 ->reactive()
                 ->afterStateUpdated(function ($state, $get, $set) {
-                    if (! $state) {
+                    if (!$state) {
                         return;
                     }
 
@@ -84,6 +84,7 @@ class NonPajakResource extends Resource
                 ->label('Toko/Konsumen')
                 ->options(\App\Models\Toko::pluck('nama_konsumen', 'id'))
                 ->searchable()
+                ->searchable()
                 ->required(),
 
             Select::make('pembayaran')
@@ -99,6 +100,15 @@ class NonPajakResource extends Resource
                 ->label('Keterangan')
                 ->rows(3)
                 ->columnSpanFull(),
+
+            Select::make('status')
+                ->label('Status')
+                ->options([
+                    'Belum Selesai' => 'Belum Selesai',
+                    'Selesai' => 'Selesai',
+                ])
+                ->default('Belum Selesai')
+                ->required(),
         ]);
     }
 
@@ -186,6 +196,13 @@ class NonPajakResource extends Resource
             ->columns([
                 TextColumn::make('no_invoice_non_pajak')->label('Invoice')->sortable(),
                 TextColumn::make('no_surat_jalan')->label('Surat Jalan')->sortable(),
+                TextColumn::make('pembayaran')->label('Pembayaran'),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'Selesai' => 'success',
+                        'Belum Selesai' => 'warning',
+                    }),
                 TextColumn::make('tanggal')->label('Tanggal')->date()->sortable(),
                 TextColumn::make('sales.nama')->label('Sales')->sortable(),
                 TextColumn::make('toko.nama_konsumen')->label('Toko/Konsumen')->sortable(),
@@ -193,18 +210,18 @@ class NonPajakResource extends Resource
                 TextColumn::make('total_harga_jual')
                     ->label('Total Harga Jual')
                     ->getStateUsing(
-                        fn (NonPajak $record): int => $record->details->sum(function ($detail) {
+                        fn(NonPajak $record): int => $record->details->sum(function ($detail) {
                             return ($detail->harga_jual ?? 0) * ($detail->jumlah_keluar ?? 0);
                         })
                     )
                     ->formatStateUsing(
-                        fn (int $state): string => number_format($state, 0, ',', '.')
+                        fn(int $state): string => number_format($state, 0, ',', '.')
                     ),
 
                 TextColumn::make('total_keuntungan')
                     ->label('Total Keuntungan')
                     ->getStateUsing(
-                        fn (NonPajak $record): int => $record->details->sum(function ($detail) {
+                        fn(NonPajak $record): int => $record->details->sum(function ($detail) {
                             $totalJual = ($detail->harga_jual ?? 0) * ($detail->jumlah_keluar ?? 0);
                             $totalModal = ($detail->harga_modal ?? 0) * ($detail->jumlah_keluar ?? 0);
 
@@ -212,11 +229,17 @@ class NonPajakResource extends Resource
                         })
                     )
                     ->formatStateUsing(
-                        fn (int $state): string => number_format($state, 0, ',', '.')
+                        fn(int $state): string => number_format($state, 0, ',', '.')
                     ),
             ])
             ->actions([
-                EditAction::make(),
+                Action::make('tandai_selesai')
+                    ->label('Selesai')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(fn(NonPajak $record) => $record->status === 'Belum Selesai')
+                    ->action(fn(NonPajak $record) => $record->update(['status' => 'Selesai'])),
 
                 Action::make('download')
                     ->label('Download')
@@ -229,18 +252,21 @@ class NonPajakResource extends Resource
                                 // 'surat_jalan_apjt' => 'Surat Jalan',
                                 'invoice_sjt' => 'Invoice',
                                 // 'invoice_apjt'     => 'Invoice',
+                                'quotation_sjt' => 'Quotation',
                             ])
                             ->required(),
                     ])
-                    ->action(fn (NonPajak $record, array $data) => redirect()->to(
+                    ->action(fn(NonPajak $record, array $data) => redirect()->to(
                         route(match ($data['type']) {
                             'surat_jalan_sjt' => 'transaksi-produk.surat-jalan.sjt',
                             'surat_jalan_apjt' => 'transaksi-produk.surat-jalan.apjt',
                             'invoice_sjt' => 'transaksi-produk.invoice.sjt',
                             'invoice_apjt' => 'transaksi-produk.invoice.apjt',
+                            'quotation_sjt' => 'transaksi-produk.quotation.sjt',
                         }, $record)
                     )),
 
+                EditAction::make(),
             ])
             ->filters([
                 \Filament\Tables\Filters\Filter::make('rentang_tanggal')
@@ -251,8 +277,8 @@ class NonPajakResource extends Resource
                     ])
                     ->query(function ($query, array $data) {
                         return $query
-                            ->when($data['from'], fn ($q, $from) => $q->whereDate('tanggal', '>=', $from))
-                            ->when($data['until'], fn ($q, $until) => $q->whereDate('tanggal', '<=', $until));
+                            ->when($data['from'], fn($q, $from) => $q->whereDate('tanggal', '>=', $from))
+                            ->when($data['until'], fn($q, $until) => $q->whereDate('tanggal', '<=', $until));
                     }),
             ]);
     }

@@ -90,7 +90,11 @@ class UnitAc extends Model
                 $q->where('status', 'Selesai');
             })
             ->sum('jumlah_keluar');
-        $keluarNonPajak = $this->nonPajakDetails()->sum('jumlah_keluar');
+        $keluarNonPajak = $this->nonPajakDetails()
+            ->whereHas('nonPajak', function ($q) {
+                $q->where('status', 'Selesai');
+            })
+            ->sum('jumlah_keluar');
 
         $totalKeluar = $keluarTransaksi + $keluarPajak + $keluarNonPajak;
 

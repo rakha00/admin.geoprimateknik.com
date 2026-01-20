@@ -226,7 +226,13 @@ class PajakResource extends Resource
             ])
 
             ->actions([
-                EditAction::make(),
+                Action::make('tandai_selesai')
+                    ->label('Selesai')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(fn (Pajak $record) => $record->status === 'Belum Selesai')
+                    ->action(fn (Pajak $record) => $record->update(['status' => 'Selesai'])),
 
                 Action::make('download')
                     ->label('Download')
@@ -239,6 +245,7 @@ class PajakResource extends Resource
                                 'surat_jalan_apjt' => 'Surat Jalan',
                                 // 'invoice_sjt'      => 'Invoice SJT',
                                 'invoice_apjt' => 'Invoice',
+                                'quotation_apjt' => 'Quotation',
                             ])
                             ->required(),
                     ])
@@ -246,9 +253,11 @@ class PajakResource extends Resource
                         route(match ($data['type']) {
                             'surat_jalan_apjt' => 'transaksi-produk.surat-jalan.apjt',
                             'invoice_apjt' => 'transaksi-produk.invoice.apjt',
+                            'quotation_apjt' => 'transaksi-produk.quotation.apjt',
                         }, $record)
                     )),
 
+                EditAction::make(),
             ])
 
             ->filters([

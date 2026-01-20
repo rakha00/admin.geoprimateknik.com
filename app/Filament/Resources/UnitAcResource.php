@@ -108,7 +108,11 @@ class UnitAcResource extends Resource
                                 $q->where('status', 'Selesai');
                             })
                             ->sum('jumlah_keluar');
-                        $keluarNonPajak = $record->nonPajakDetails()->sum('jumlah_keluar');
+                        $keluarNonPajak = $record->nonPajakDetails()
+                            ->whereHas('nonPajak', function ($q) {
+                                $q->where('status', 'Selesai');
+                            })
+                            ->sum('jumlah_keluar');
 
                         return $keluarTransaksi + $keluarPajak + $keluarNonPajak;
                     })
@@ -133,7 +137,11 @@ class UnitAcResource extends Resource
                                 $q->where('status', 'Selesai');
                             })
                             ->sum('jumlah_keluar');
-                        $keluarNonPajak = $record->nonPajakDetails()->sum('jumlah_keluar');
+                        $keluarNonPajak = $record->nonPajakDetails()
+                            ->whereHas('nonPajak', function ($q) {
+                                $q->where('status', 'Selesai');
+                            })
+                            ->sum('jumlah_keluar');
                         $keluar = $keluarTransaksi + $keluarPajak + $keluarNonPajak;
 
                         return ($record->stock_awal ?? 0) + $masuk - $keluar;

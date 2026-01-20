@@ -16,8 +16,20 @@ class NonPajak extends Model
         'sales_id',
         'toko_id',
         'pembayaran',
+        'status',
         'remarks',
     ];
+
+    protected static function booted()
+    {
+        static::saved(function ($model) {
+            if ($model->isDirty('status')) {
+                foreach ($model->details as $detail) {
+                    $detail->unitAc?->recalculateStock();
+                }
+            }
+        });
+    }
 
     public function details()
     {

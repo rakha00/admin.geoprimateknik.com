@@ -39,4 +39,12 @@ class TransaksiProdukPdfController extends Controller
 
         return $pdf->download('P-Invoice-GTP-'.str_replace(['/', '\\'], '-', $transaksi->no_invoice).'.pdf');
     }
+
+    public function quotationApjt(Pajak $transaksi)
+    {
+        $pdf = Pdf::loadView('pdf.APJT-quotation', compact('transaksi'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download('P-Quotation-GTP-'.str_replace(['/', '\\'], '-', $transaksi->no_invoice).'.pdf');
+    }
 }

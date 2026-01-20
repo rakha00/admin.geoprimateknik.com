@@ -27,8 +27,14 @@ Route::get('/transaksi-produk/{transaksi}/surat-jalan/apjt', [TransaksiProdukPdf
 Route::get('/transaksi-produk/{transaksi}/invoice/sjt', [TransaksiProdukPdfController::class, 'invoiceSjt'])
     ->name('transaksi-produk.invoice.sjt');
 
+Route::get('/transaksi-produk/{transaksi}/quotation/sjt', [TransaksiProdukPdfController::class, 'quotationSjt'])
+    ->name('transaksi-produk.quotation.sjt');
+
 Route::get('/transaksi-produk/{transaksi}/invoice/apjt', [TransaksiProdukPdfController::class, 'invoiceApjt'])
     ->name('transaksi-produk.invoice.apjt');
+
+Route::get('/transaksi-produk/{transaksi}/quotation/apjt', [TransaksiProdukPdfController::class, 'quotationApjt'])
+    ->name('transaksi-produk.quotation.apjt');
 
 Route::get('/transaksi-jasa/{transaksi}/invoice', [\App\Http\Controllers\TransaksiJasaPdfController::class, 'invoice'])
     ->name('transaksi-jasa.print.invoice');
