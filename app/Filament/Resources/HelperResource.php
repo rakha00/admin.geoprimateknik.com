@@ -27,6 +27,8 @@ class HelperResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    protected static ?string $slug = 'helper';
+
     public static function canViewAny(): bool
     {
         return auth()->user()->level == 1;

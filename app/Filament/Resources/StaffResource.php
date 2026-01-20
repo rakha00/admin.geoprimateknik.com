@@ -30,6 +30,8 @@ class StaffResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
+    protected static ?string $slug = 'staff';
+
     public static function canViewAny(): bool
     {
         return auth()->user()->level == 1;

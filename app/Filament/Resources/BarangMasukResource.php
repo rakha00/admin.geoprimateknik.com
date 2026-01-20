@@ -27,6 +27,8 @@ class BarangMasukResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    protected static ?string $slug = 'barang-masuk';
+
     public static function canViewAny(): bool
     {
         return auth()->user()->level == 1;
@@ -52,7 +54,7 @@ class BarangMasukResource extends Resource
                             return;
                         }
                         $d = Carbon::parse($state)->format('dmY');
-                        $count = BarangMasuk::whereDate('tanggal', $state)->count() + 1;
+                        $count = BarangMasuk::whereDate('tanggal', '=', $state, 'and')->count() + 1;
                         $set('nomor_barang_masuk', "BM/{$d}-{$count}");
                     }),
 
@@ -76,7 +78,7 @@ class BarangMasukResource extends Resource
     public static function mutateFormDataBeforeCreate(array $data): array
     {
         $d = Carbon::parse($data['tanggal'])->format('dmY');
-        $count = BarangMasuk::whereDate('tanggal', $data['tanggal'])->count() + 1;
+        $count = BarangMasuk::whereDate('tanggal', '=', $data['tanggal'], 'and')->count() + 1;
         $data['nomor_barang_masuk'] = "BM/{$d}-{$count}";
 
         return $data;
@@ -86,7 +88,7 @@ class BarangMasukResource extends Resource
     {
         if (isset($data['tanggal'])) {
             $d = Carbon::parse($data['tanggal'])->format('dmY');
-            $count = BarangMasuk::whereDate('tanggal', $data['tanggal'])
+            $count = BarangMasuk::whereDate('tanggal', '=', $data['tanggal'], 'and')
                 ->where('id', '!=', $record->id)
                 ->count() + 1;
             $data['nomor_barang_masuk'] = "BM/{$d}-{$count}";

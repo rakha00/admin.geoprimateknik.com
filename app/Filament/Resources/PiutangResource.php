@@ -31,6 +31,8 @@ class PiutangResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    protected static ?string $slug = 'piutang';
+
     public static function canViewAny(): bool
     {
         return auth()->user()->level == 1;
@@ -42,7 +44,7 @@ class PiutangResource extends Resource
             ->schema([
                 Forms\Components\Select::make('pajak_id')
                     ->label('Pajak')
-                    ->options(Pajak::orderBy('no_invoice')->pluck('no_invoice', 'id'))
+                    ->options(Pajak::orderBy('no_invoice', 'asc')->pluck('no_invoice', 'id'))
                     ->searchable()
                     ->nullable()
                     ->reactive()
@@ -56,7 +58,7 @@ class PiutangResource extends Resource
 
                 Forms\Components\Select::make('non_pajak_id')
                     ->label('Non Pajak')
-                    ->options(NonPajak::orderBy('no_invoice_non_pajak')->pluck('no_invoice_non_pajak', 'id'))
+                    ->options(NonPajak::orderBy('no_invoice_non_pajak', 'asc')->pluck('no_invoice_non_pajak', 'id'))
                     ->searchable()
                     ->nullable()
                     ->reactive()

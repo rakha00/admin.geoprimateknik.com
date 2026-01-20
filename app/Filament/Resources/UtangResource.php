@@ -28,6 +28,8 @@ class UtangResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    protected static ?string $slug = 'utang';
+
     public static function canViewAny(): bool
     {
         return auth()->user()->level == 1;

@@ -27,6 +27,8 @@ class PengeluaranTransaksiProdukResource extends Resource
 
     protected static ?int $navigationSort = 5;
 
+    protected static ?string $slug = 'pengeluaran-transaksi';
+
     public static function canViewAny(): bool
     {
         return auth()->user()->level == 1;

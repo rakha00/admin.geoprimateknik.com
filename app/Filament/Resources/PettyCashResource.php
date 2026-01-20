@@ -30,6 +30,8 @@ class PettyCashResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    protected static ?string $slug = 'petty-cash';
+
     public static function canViewAny(): bool
     {
         return auth()->user()->level == 1;

@@ -35,6 +35,8 @@ class PajakResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'no_invoice';
 
+    protected static ?string $slug = 'transaksi-pajak';
+
     public static function getPluralLabel(): string
     {
         return 'Transaksi Produk Pajak'; // judul di list page

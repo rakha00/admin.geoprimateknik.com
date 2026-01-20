@@ -26,6 +26,8 @@ class TokoResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    protected static ?string $slug = 'toko';
+
     public static function canViewAny(): bool
     {
         return auth()->user()->level == 1;

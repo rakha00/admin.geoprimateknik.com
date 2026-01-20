@@ -23,6 +23,8 @@ class ProgressMerkResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    protected static ?string $slug = 'progres-merk';
+
     public static function canCreate(): bool
     {
         return false;
@@ -110,7 +112,7 @@ class ProgressMerkResource extends Resource
                     }
                 }
 
-                return TransaksiProdukDetail::whereIn('id', $ids);
+                return TransaksiProdukDetail::whereIn('id', $ids, 'and', false);
             })
             ->paginated(false);
     }

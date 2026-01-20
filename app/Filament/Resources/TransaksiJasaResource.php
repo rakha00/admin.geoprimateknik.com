@@ -34,6 +34,8 @@ class TransaksiJasaResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'no_invoice';
 
+    protected static ?string $slug = 'transaksi-jasa';
+
     public static function form(Form $form): Form
     {
         return $form

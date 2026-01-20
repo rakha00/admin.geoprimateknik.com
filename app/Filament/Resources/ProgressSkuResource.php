@@ -21,6 +21,8 @@ class ProgressSKUResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
+    protected static ?string $slug = 'progres-sku';
+
     public static function canCreate(): bool
     {
         return false;

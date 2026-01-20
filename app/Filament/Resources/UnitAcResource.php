@@ -23,6 +23,8 @@ class UnitAcResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Unit AC';
 
+    protected static ?string $slug = 'unit-ac';
+
     protected static ?int $navigationSort = 2;
 
     public static function getModelLabel(): string
@@ -77,7 +79,7 @@ class UnitAcResource extends Resource
                     ->searchable(),
                 TextColumn::make('harga_modal')
                     ->label('Harga Modal')
-                    ->formatStateUsing(fn($state): string => number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state): string => number_format($state, 0, ',', '.')),
 
                 TextColumn::make('stock_akhir')
                     ->label('Stock Akhir')
@@ -87,20 +89,20 @@ class UnitAcResource extends Resource
                 // 1) Stock Awal
                 TextColumn::make('stock_awal')
                     ->label('Stock Awal')
-                    ->visible(fn() => auth()->user()->level == 1),
+                    ->visible(fn () => auth()->user()->level == 1),
 
                 // 2) Stock Masuk = SUM(jumlah_barang_masuk)
                 TextColumn::make('stock_masuk')
                     ->label('Stock Masuk')
-                    ->visible(fn() => auth()->user()->level == 1)
+                    ->visible(fn () => auth()->user()->level == 1)
                     ->getStateUsing(
-                        fn(UnitAc $record): int => $record->barangMasukDetails()->sum('jumlah_barang_masuk')
+                        fn (UnitAc $record): int => $record->barangMasukDetails()->sum('jumlah_barang_masuk')
                     ),
 
                 // 3) Stock Keluar = SUM(jumlah_keluar)
                 TextColumn::make('stok_keluar')
                     ->label('Stock Keluar')
-                    ->visible(fn() => auth()->user()->level == 1)
+                    ->visible(fn () => auth()->user()->level == 1)
                     ->numeric()
                     ->sortable(),
 
@@ -116,7 +118,7 @@ class UnitAcResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make()
-                    ->visible(fn() => auth()->user()->level == 1),
+                    ->visible(fn () => auth()->user()->level == 1),
             ]);
     }
 

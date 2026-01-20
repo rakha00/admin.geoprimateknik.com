@@ -33,6 +33,8 @@ class SparepartKeluarResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'no_invoice';
 
+    protected static ?string $slug = 'sparepart-keluar';
+
     public static function form(Form $form): Form
     {
         return $form->schema([

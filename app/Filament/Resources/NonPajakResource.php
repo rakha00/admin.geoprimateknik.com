@@ -35,6 +35,8 @@ class NonPajakResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'no_invoice_non_pajak';
 
+    protected static ?string $slug = 'transaksi-non-pajak';
+
     public static function getPluralLabel(): string
     {
         return 'Transaksi Produk Non Pajak'; // judul di list page
@@ -153,7 +155,7 @@ class NonPajakResource extends Resource
         $yy = $date->format('y');
         $romanMonth = self::getRomanMonth($date->month);
 
-        $query = NonPajak::whereYear('tanggal', $year);
+        $query = NonPajak::whereYear('tanggal', '=', $year, 'and');
         if ($ignoreId) {
             $query->where('id', '!=', $ignoreId);
         }

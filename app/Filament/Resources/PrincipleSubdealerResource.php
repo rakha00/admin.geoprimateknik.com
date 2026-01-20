@@ -24,6 +24,8 @@ class PrincipleSubdealerResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    protected static ?string $slug = 'principle-subdealer';
+
     protected static ?string $recordTitleAttribute = 'nama';
 
     public static function canViewAny(): bool

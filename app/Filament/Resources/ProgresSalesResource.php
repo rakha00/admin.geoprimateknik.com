@@ -27,6 +27,8 @@ class ProgresSalesResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    protected static ?string $slug = 'progres-sales';
+
     // Static variable untuk menyimpan filter
     public static $currentFilters = [];
 

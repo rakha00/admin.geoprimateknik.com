@@ -29,6 +29,8 @@ class GudangResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
+    protected static ?string $slug = 'gudang';
+
     public static function canViewAny(): bool
     {
         return auth()->user()->level == 1;

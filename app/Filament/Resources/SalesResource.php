@@ -30,6 +30,8 @@ class SalesResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    protected static ?string $slug = 'sales';
+
     public static function canViewAny(): bool
     {
         return auth()->user()->level == 1;
