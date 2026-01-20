@@ -19,7 +19,7 @@ class HelperResource extends Resource
 {
     protected static ?string $model = Helper::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user';
+    protected static ?string $navigationIcon = 'heroicon-o-user-plus';
     protected static ?string $navigationLabel = 'Helper';
     protected static ?string $navigationGroup = 'Karyawan';
 

@@ -20,15 +20,15 @@ class UtangResource extends Resource
 {
     protected static ?string $model = Utang::class;
 
-    protected static ?string $navigationGroup = 'Reminder';
-    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+    protected static ?string $navigationGroup = 'Keuangan';
+    protected static ?string $navigationIcon = 'heroicon-o-banknotes';
     protected static ?string $navigationLabel = 'Utang';
-    
-public static function canViewAny(): bool
-{
-    return auth()->user()->level == 1;
-}
-    
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->level == 1;
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -38,7 +38,7 @@ public static function canViewAny(): bool
                     ->options(
                         BarangMasuk::with('principleSubdealer')
                             ->get()
-                            ->mapWithKeys(fn ($bm) => [
+                            ->mapWithKeys(fn($bm) => [
                                 $bm->id => $bm->nomor_barang_masuk . ' | ' .
                                     \Carbon\Carbon::parse($bm->tanggal)->format('d-m-Y') . ' - ' .
                                     $bm->principleSubdealer->nama
@@ -51,14 +51,14 @@ public static function canViewAny(): bool
                         if ($state) {
                             // Update total harga modal
                             $barangMasuk = BarangMasuk::with('barangMasukDetails.unitAc', 'principleSubdealer')->find($state);
-                            
+
                             if ($barangMasuk) {
                                 $totalHargaModal = $barangMasuk->barangMasukDetails->sum(function ($detail) {
                                     $harga = $detail->harga_modal ?? 0;
                                     $jumlah = $detail->jumlah_barang_masuk ?? 0;
                                     return $harga * $jumlah;
                                 });
-                                
+
                                 $set('total_harga_modal_display', 'Rp ' . number_format($totalHargaModal, 0, ',', '.'));
                                 $set('nama_principle_display', $barangMasuk->principleSubdealer->nama ?? '');
                             }
@@ -80,10 +80,12 @@ public static function canViewAny(): bool
 
                         // Jika create (tidak ada record), hitung manual berdasarkan barang_masuk_id
                         $barangMasukId = $get('barang_masuk_id');
-                        if (!$barangMasukId) return '';
+                        if (!$barangMasukId)
+                            return '';
 
                         $barangMasuk = \App\Models\BarangMasuk::with('barangMasukDetails.unitAc')->find($barangMasukId);
-                        if (!$barangMasuk) return '';
+                        if (!$barangMasuk)
+                            return '';
 
                         $totalHargaModal = $barangMasuk->barangMasukDetails->sum(function ($detail) {
                             $hargaModal = $detail->unitAc->harga_modal ?? 0;
@@ -94,16 +96,17 @@ public static function canViewAny(): bool
                         return 'Rp ' . number_format($totalHargaModal, 0, ',', '.');
                     }),
 
-                
-                        
+
+
                 Forms\Components\TextInput::make('nama_principle_display')
                     ->label('Nama Principle')
                     ->disabled()
                     ->dehydrated(false)
                     ->formatStateUsing(function ($state, Get $get, $record = null) {
                         $barangMasukId = $get('barang_masuk_id') ?? $record?->barang_masuk_id;
-                        if (!$barangMasukId) return '';
-                        
+                        if (!$barangMasukId)
+                            return '';
+
                         $barangMasuk = BarangMasuk::with('principleSubdealer')->find($barangMasukId);
                         return $barangMasuk?->principleSubdealer?->nama ?? '';
                     }),
@@ -111,13 +114,14 @@ public static function canViewAny(): bool
                 Forms\Components\DatePicker::make('due_date')
                     ->label('Jatuh Tempo')
                     ->required(),
-                
+
                 Forms\Components\TextInput::make('sudah_dibayar_sebelumnya')
                     ->label('Sudah Dibayar')
                     ->disabled()
                     ->dehydrated(false)
                     ->formatStateUsing(function ($state, $record = null) {
-                        if (!$record) return 'Rp 0'; // Untuk create form
+                        if (!$record)
+                            return 'Rp 0'; // Untuk create form
                         return 'Rp ' . number_format($record->sudah_dibayar ?? 0, 0, ',', '.');
                     }),
 
@@ -131,20 +135,20 @@ public static function canViewAny(): bool
                         $sudahDibayarLama = $record?->sudah_dibayar ?? 0;
                         $pembayaranBaru = (float) ($state ?? 0);
                         $totalBaru = $sudahDibayarLama + $pembayaranBaru;
-                        
+
                         $set('sudah_dibayar', $totalBaru);
                         // Hapus update display karena sudah ada formatStateUsing
-
+            
                         if ($state) {
                             $barangMasuk = BarangMasuk::with('barangMasukDetails.unitAc', 'principleSubdealer')->find($state);
-                    
+
                             if ($barangMasuk) {
                                 $totalHargaModal = $barangMasuk->barangMasukDetails->sum(function ($detail) {
                                     $harga = $detail->unitAc->harga_modal ?? 0;
                                     $jumlah = $detail->jumlah_barang_masuk ?? 0;
                                     return $harga * $jumlah;
                                 });
-                    
+
                                 $set('total_harga_modal_display', 'Rp ' . number_format($totalHargaModal, 0, ',', '.'));
                                 $set('nama_principle_display', $barangMasuk->principleSubdealer->nama ?? '');
                             }
@@ -193,12 +197,12 @@ public static function canViewAny(): bool
 
                 Tables\Columns\TextColumn::make('total_harga_modal')
                     ->label('Total Harga Modal')
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
-                
-                
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+
+
                 Tables\Columns\TextColumn::make('sudah_dibayar')
                     ->label('Sudah Dibayar')
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 Tables\Columns\TextColumn::make('due_date')
                     ->label('Jatuh Tempo')
@@ -211,75 +215,76 @@ public static function canViewAny(): bool
                         'success' => 'sudah lunas',
                     ])
                     ->label('Status')
-                    ->formatStateUsing(fn ($state) => ucwords($state)),
+                    ->formatStateUsing(fn($state) => ucwords($state)),
             ])
-            ->modifyQueryUsing(fn (Builder $query) =>
+            ->modifyQueryUsing(
+                fn(Builder $query) =>
                 $query->with('barangMasuk.barangMasukDetails.unitAc')
             )
             ->filters([
-    // Filter Bulan berdasarkan tanggal barang masuk
-    \Filament\Tables\Filters\SelectFilter::make('bulan')
-        ->label('Filter Bulan')
-        ->options([
-            '1' => 'Januari',
-            '2' => 'Februari',
-            '3' => 'Maret',
-            '4' => 'April',
-            '5' => 'Mei',
-            '6' => 'Juni',
-            '7' => 'Juli',
-            '8' => 'Agustus',
-            '9' => 'September',
-            '10' => 'Oktober',
-            '11' => 'November',
-            '12' => 'Desember',
-        ])
-        ->query(function (Builder $query, array $data) {
-            if (isset($data['value']) && $data['value']) {
-                return $query->whereHas('barangMasuk', function ($q) use ($data) {
-                    $q->whereMonth('tanggal', $data['value']);
-                });
-            }
-            return $query;
-        }),
+                // Filter Bulan berdasarkan tanggal barang masuk
+                \Filament\Tables\Filters\SelectFilter::make('bulan')
+                    ->label('Filter Bulan')
+                    ->options([
+                        '1' => 'Januari',
+                        '2' => 'Februari',
+                        '3' => 'Maret',
+                        '4' => 'April',
+                        '5' => 'Mei',
+                        '6' => 'Juni',
+                        '7' => 'Juli',
+                        '8' => 'Agustus',
+                        '9' => 'September',
+                        '10' => 'Oktober',
+                        '11' => 'November',
+                        '12' => 'Desember',
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (isset($data['value']) && $data['value']) {
+                            return $query->whereHas('barangMasuk', function ($q) use ($data) {
+                                $q->whereMonth('tanggal', $data['value']);
+                            });
+                        }
+                        return $query;
+                    }),
 
-    // Filter Tahun berdasarkan tanggal barang masuk
-    \Filament\Tables\Filters\SelectFilter::make('tahun')
-        ->label('Filter Tahun')
-        ->options(function () {
-            $years = [];
-            $currentYear = date('Y');
-            for ($i = $currentYear - 5; $i <= $currentYear + 1; $i++) {
-                $years[$i] = $i;
-            }
-            return $years;
-        })
-        ->query(function (Builder $query, array $data) {
-            if (isset($data['value']) && $data['value']) {
-                return $query->whereHas('barangMasuk', function ($q) use ($data) {
-                    $q->whereYear('tanggal', $data['value']);
-                });
-            }
-            return $query;
-        }),
+                // Filter Tahun berdasarkan tanggal barang masuk
+                \Filament\Tables\Filters\SelectFilter::make('tahun')
+                    ->label('Filter Tahun')
+                    ->options(function () {
+                        $years = [];
+                        $currentYear = date('Y');
+                        for ($i = $currentYear - 5; $i <= $currentYear + 1; $i++) {
+                            $years[$i] = $i;
+                        }
+                        return $years;
+                    })
+                    ->query(function (Builder $query, array $data) {
+                        if (isset($data['value']) && $data['value']) {
+                            return $query->whereHas('barangMasuk', function ($q) use ($data) {
+                                $q->whereYear('tanggal', $data['value']);
+                            });
+                        }
+                        return $query;
+                    }),
 
-    // Filter Rentang Tanggal
-    Tables\Filters\Filter::make('tanggal')
-        ->form([
-            Forms\Components\DatePicker::make('from')->label('Dari Tanggal'),
-            Forms\Components\DatePicker::make('until')->label('Sampai Tanggal'),
-        ])
-        ->query(function (Builder $query, array $data) {
-            return $query->whereHas('barangMasuk', function ($q) use ($data) {
-                if ($data['from']) {
-                    $q->whereDate('tanggal', '>=', $data['from']);
-                }
-                if ($data['until']) {
-                    $q->whereDate('tanggal', '<=', $data['until']);
-                }
-            });
-        }),
-])
+                // Filter Rentang Tanggal
+                Tables\Filters\Filter::make('tanggal')
+                    ->form([
+                        Forms\Components\DatePicker::make('from')->label('Dari Tanggal'),
+                        Forms\Components\DatePicker::make('until')->label('Sampai Tanggal'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query->whereHas('barangMasuk', function ($q) use ($data) {
+                            if ($data['from']) {
+                                $q->whereDate('tanggal', '>=', $data['from']);
+                            }
+                            if ($data['until']) {
+                                $q->whereDate('tanggal', '<=', $data['until']);
+                            }
+                        });
+                    }),
+            ])
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])

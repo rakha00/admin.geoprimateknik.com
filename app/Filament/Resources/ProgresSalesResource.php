@@ -58,7 +58,7 @@ class ProgresSalesResource extends Resource
                         $result = $query->first();
                         return $result->total ?: 0;
                     })
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state ?: 0, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state ?: 0, 0, ',', '.')),
 
                 TextColumn::make('total_unit')
                     ->label('Total Unit Terjual')
@@ -104,7 +104,7 @@ class ProgresSalesResource extends Resource
                         }
 
                         $result = $query->first();
-                        
+
                         if (!$result || $result->total_modal == 0) {
                             return '0%';
                         }
@@ -126,7 +126,7 @@ class ProgresSalesResource extends Resource
                     ->query(function (Builder $query, array $data): Builder {
                         // Simpan filter ke static variable
                         static::$currentFilters = $data;
-                        
+
                         return $query->when(
                             $data['from'] || $data['until'],
                             function (Builder $query) use ($data) {

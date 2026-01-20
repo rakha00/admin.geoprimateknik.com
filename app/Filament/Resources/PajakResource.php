@@ -25,9 +25,9 @@ use Filament\Tables\Actions\EditAction;
 class PajakResource extends Resource
 {
     protected static ?string $model = Pajak::class;
-    protected static ?string $navigationIcon = 'heroicon-o-banknotes';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationGroup = 'Transaksi';
-    protected static ?string $navigationLabel = 'Transaksi Produk Pajak';
+    protected static ?string $navigationLabel = 'Transaksi Pajak';
     protected static ?string $recordTitleAttribute = 'no_invoice';
     public static function getPluralLabel(): string
     {

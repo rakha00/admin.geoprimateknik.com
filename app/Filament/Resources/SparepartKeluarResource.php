@@ -24,7 +24,7 @@ class SparepartKeluarResource extends Resource
 {
     protected static ?string $model = SparepartKeluar::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
+    protected static ?string $navigationIcon = 'heroicon-o-arrow-up-on-square-stack';
     protected static ?string $navigationGroup = 'Transaksi';
     protected static ?string $navigationLabel = 'Sparepart Keluar';
     protected static ?string $recordTitleAttribute = 'no_invoice';

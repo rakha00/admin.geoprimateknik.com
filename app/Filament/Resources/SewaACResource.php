@@ -20,8 +20,7 @@ class SewaACResource extends Resource
 {
     protected static ?string $model = SewaAC::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
+    protected static ?string $navigationIcon = 'heroicon-o-clock';
     protected static ?string $navigationLabel = 'Sewa AC';
     protected static ?string $navigationGroup = 'Transaksi';
 

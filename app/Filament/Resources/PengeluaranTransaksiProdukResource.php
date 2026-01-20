@@ -19,8 +19,9 @@ class PengeluaranTransaksiProdukResource extends Resource
 {
     protected static ?string $model = PengeluaranTransaksiProduk::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Transaksi';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
+    protected static ?string $navigationGroup = 'Keuangan';
+    protected static ?string $navigationLabel = 'Pengeluaran Transaksi';
 
     public static function canViewAny(): bool
     {

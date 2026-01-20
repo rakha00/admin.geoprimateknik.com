@@ -19,9 +19,9 @@ class GudangResource extends Resource
 {
     protected static ?string $model = Gudang::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user';
+    protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
     protected static ?string $navigationLabel = 'Gudang';
-    protected static ?string $navigationGroup = 'Karyawan';
+    protected static ?string $navigationGroup = 'Inventori';
 
     public static function canViewAny(): bool
     {

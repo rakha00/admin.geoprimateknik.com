@@ -14,18 +14,27 @@ class ProgressMerkResource extends Resource
     // Tetap menggunakan model dummy, tapi data diambil dari custom logic
     protected static ?string $model = TransaksiProdukDetail::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
-    protected static ?string $navigationLabel = 'Progress Merk';
+    protected static ?string $navigationIcon = 'heroicon-o-tag';
+    protected static ?string $navigationLabel = 'Progres Merk';
     protected static ?string $navigationGroup = 'Laporan';
 
-    public static function canCreate(): bool { return false; }
-    public static function canEdit($record): bool { return false; }
-    public static function canDelete($record): bool { return false; }
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+    public static function canEdit($record): bool
+    {
+        return false;
+    }
+    public static function canDelete($record): bool
+    {
+        return false;
+    }
 
     public static function canViewAny(): bool
-{
-    return auth()->user()->level == 1;
-}
+    {
+        return auth()->user()->level == 1;
+    }
 
     public static function table(Table $table): Table
     {
@@ -34,7 +43,7 @@ class ProgressMerkResource extends Resource
                 TextColumn::make('nama_unit')
                     ->label('Merk (Nama Unit)')
                     ->searchable()
-                    ->getStateUsing(fn ($record) => $record->unitAc->nama_unit ?? 'N/A'),
+                    ->getStateUsing(fn($record) => $record->unitAc->nama_unit ?? 'N/A'),
 
                 TextColumn::make('total_terjual')
                     ->label('Total Terjual')
@@ -70,12 +79,12 @@ class ProgressMerkResource extends Resource
                                 $q->whereMonth('tanggal', $data['value']);
                             });
                         }
-            
+
                         return $query;
                     }),
             ])
-            
-            
+
+
             ->query(function () {
                 // Ambil satu record per nama_unit (yang pertama untuk setiap merk)
                 $namaUnits = TransaksiProdukDetail::with('unitAc')
@@ -89,7 +98,7 @@ class ProgressMerkResource extends Resource
                     $firstRecord = TransaksiProdukDetail::whereHas('unitAc', function ($query) use ($namaUnit) {
                         $query->where('nama_unit', $namaUnit);
                     })->first();
-                    
+
                     if ($firstRecord) {
                         $ids[] = $firstRecord->id;
                     }

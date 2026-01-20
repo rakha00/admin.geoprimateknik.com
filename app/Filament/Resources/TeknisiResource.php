@@ -17,9 +17,9 @@ use Filament\Tables\Filters\SelectFilter;
 class TeknisiResource extends Resource
 {
     protected static ?string $model = Teknisi::class;
-    protected static ?string $navigationGroup = 'Karyawan';
+    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
     protected static ?string $navigationLabel = 'Teknisi';
-    protected static ?string $navigationIcon = 'heroicon-o-user';
+    protected static ?string $navigationGroup = 'Karyawan';
 
     public static function canViewAny(): bool
     {

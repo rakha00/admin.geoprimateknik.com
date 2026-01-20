@@ -16,14 +16,14 @@ use Illuminate\Support\Carbon;
 class ProgresTokoResource extends Resource
 {
     protected static ?string $model = Toko::class;
-    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
     protected static ?string $navigationLabel = 'Progres Toko';
     protected static ?string $navigationGroup = 'Laporan';
 
-    public static function shouldRegisterNavigation(): bool
-{
-    return false;
-}
+    // public static function shouldRegisterNavigation(): bool
+    // {
+    //     return false;
+    // }
 
     public static function canViewAny(): bool
     {
@@ -44,15 +44,15 @@ class ProgresTokoResource extends Resource
                         // Ambil filter dari table filters state
                         $month = $livewire->tableFilters['bulan']['value'] ?? null;
                         $year = $livewire->tableFilters['tahun']['value'] ?? null;
-                        
+
                         $transactions = $record->transaksiProdukFix()
-                            ->when($month, fn ($q) => $q->whereMonth('created_at', $month))
-                            ->when($year, fn ($q) => $q->whereYear('created_at', $year))
+                            ->when($month, fn($q) => $q->whereMonth('created_at', $month))
+                            ->when($year, fn($q) => $q->whereYear('created_at', $year))
                             ->with('details')
                             ->get();
-                    
+
                         return $transactions->flatMap->details
-                            ->sum(fn ($detail) => ($detail->harga_jual ?? 0) * ($detail->jumlah_keluar ?? 0));
+                            ->sum(fn($detail) => ($detail->harga_jual ?? 0) * ($detail->jumlah_keluar ?? 0));
                     })
                     ->money('IDR'),
 
@@ -61,13 +61,13 @@ class ProgresTokoResource extends Resource
                     ->getStateUsing(function (Toko $record, $livewire) {
                         $month = $livewire->tableFilters['bulan']['value'] ?? null;
                         $year = $livewire->tableFilters['tahun']['value'] ?? null;
-                        
+
                         $transactions = $record->transaksiProdukFix()
-                            ->when($month, fn ($q) => $q->whereMonth('created_at', $month))
-                            ->when($year, fn ($q) => $q->whereYear('created_at', $year))
+                            ->when($month, fn($q) => $q->whereMonth('created_at', $month))
+                            ->when($year, fn($q) => $q->whereYear('created_at', $year))
                             ->with('details')
                             ->get();
-                        
+
                         return $transactions->flatMap->details
                             ->sum('jumlah_keluar');
                     }),
@@ -77,17 +77,17 @@ class ProgresTokoResource extends Resource
                     ->getStateUsing(function (Toko $record, $livewire) {
                         $month = $livewire->tableFilters['bulan']['value'] ?? null;
                         $year = $livewire->tableFilters['tahun']['value'] ?? null;
-                        
+
                         $transactions = $record->transaksiProdukFix()
-                            ->when($month, fn ($q) => $q->whereMonth('created_at', $month))
-                            ->when($year, fn ($q) => $q->whereYear('created_at', $year))
+                            ->when($month, fn($q) => $q->whereMonth('created_at', $month))
+                            ->when($year, fn($q) => $q->whereYear('created_at', $year))
                             ->with('details')
                             ->get();
 
                         $details = $transactions->flatMap->details;
 
-                        $totalJual = $details->sum(fn ($d) => ($d->harga_jual ?? 0) * ($d->jumlah_keluar ?? 0));
-                        $totalModal = $details->sum(fn ($d) => ($d->harga_modal ?? 0) * ($d->jumlah_keluar ?? 0));
+                        $totalJual = $details->sum(fn($d) => ($d->harga_jual ?? 0) * ($d->jumlah_keluar ?? 0));
+                        $totalModal = $details->sum(fn($d) => ($d->harga_modal ?? 0) * ($d->jumlah_keluar ?? 0));
 
                         return $totalJual - $totalModal;
                     })

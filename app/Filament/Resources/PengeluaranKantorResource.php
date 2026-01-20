@@ -17,8 +17,8 @@ class PengeluaranKantorResource extends Resource
 {
     protected static ?string $model = PengeluaranKantor::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Transaksi';
+    protected static ?string $navigationIcon = 'heroicon-o-calculator';
+    protected static ?string $navigationGroup = 'Keuangan';
     protected static ?string $navigationLabel = 'Pengeluaran Kantor';
 
     public static function canViewAny(): bool

@@ -17,13 +17,13 @@ class TokoResource extends Resource
     protected static ?string $model = Toko::class;
 
     protected static ?string $navigationGroup = 'Master Data';
-    protected static ?string $navigationIcon  = 'heroicon-o-building-storefront';
-    protected static ?string $navigationLabel = 'Toko/Customer';
+    protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
+    protected static ?string $navigationLabel = 'Toko';
 
-public static function canViewAny(): bool
-{
-    return auth()->user()->level == 1;
-}
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->level == 1;
+    }
 
     public static function form(Form $form): Form
     {
@@ -68,9 +68,9 @@ public static function canViewAny(): bool
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListTokos::route('/'),
+            'index' => Pages\ListTokos::route('/'),
             'create' => Pages\CreateToko::route('/create'),
-            'edit'   => Pages\EditToko::route('/{record}/edit'),
+            'edit' => Pages\EditToko::route('/{record}/edit'),
         ];
     }
 }

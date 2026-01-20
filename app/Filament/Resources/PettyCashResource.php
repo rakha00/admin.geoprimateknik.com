@@ -24,82 +24,84 @@ class PettyCashResource extends Resource
 {
     protected static ?string $model = PettyCash::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+    protected static ?string $navigationLabel = 'Petty Cash';
+    protected static ?string $navigationGroup = 'Keuangan';
 
-public static function canViewAny(): bool
-{
-    return auth()->user()->level == 1;
-}
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->level == 1;
+    }
 
-public static function form(Form $form): Form
-{
-    return $form
-        ->schema([
-            DatePicker::make('tanggal')
-                ->required(),
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                DatePicker::make('tanggal')
+                    ->required(),
 
-            TextInput::make('nominal')
-                ->numeric()
-                ->prefix('Rp')
-                ->required(),
+                TextInput::make('nominal')
+                    ->numeric()
+                    ->prefix('Rp')
+                    ->required(),
 
-            Forms\Components\Select::make('kategori')
-                ->options([
-                    'Pemasukan' => 'Pemasukan',
-                    'Pengeluaran' => 'Pengeluaran',
-                ])
-                ->required(),
+                Forms\Components\Select::make('kategori')
+                    ->options([
+                        'Pemasukan' => 'Pemasukan',
+                        'Pengeluaran' => 'Pengeluaran',
+                    ])
+                    ->required(),
 
-            Forms\Components\Select::make('metode_pembayaran')
-                ->options([
-                    'Cash' => 'Cash',
-                    'BCA' => 'BCA',
-                    'Mandiri' => 'Mandiri',
-                ])
-                ->required(),
+                Forms\Components\Select::make('metode_pembayaran')
+                    ->options([
+                        'Cash' => 'Cash',
+                        'BCA' => 'BCA',
+                        'Mandiri' => 'Mandiri',
+                    ])
+                    ->required(),
 
-            Textarea::make('keterangan')
-                ->rows(3),
+                Textarea::make('keterangan')
+                    ->rows(3),
 
-            FileUpload::make('bukti_pembayaran')
-                ->image()
-                ->directory('bukti-pembayaran')
-                ->imagePreviewHeight('500')
-                ->downloadable()
-                ->openable()
-                ->nullable(),
-        ]);
-}
+                FileUpload::make('bukti_pembayaran')
+                    ->image()
+                    ->directory('bukti-pembayaran')
+                    ->imagePreviewHeight('500')
+                    ->downloadable()
+                    ->openable()
+                    ->nullable(),
+            ]);
+    }
 
 
-public static function table(Table $table): Table
-{
-    return $table
-        ->columns([
-            TextColumn::make('tanggal')->date()->sortable(),
-            TextColumn::make('kategori')->badge()
-                ->colors([
-                    'success' => fn ($state) => $state === 'Pemasukan',
-                    'danger' => fn ($state) => $state === 'Pengeluaran',
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('tanggal')->date()->sortable(),
+                TextColumn::make('kategori')->badge()
+                    ->colors([
+                        'success' => fn($state) => $state === 'Pemasukan',
+                        'danger' => fn($state) => $state === 'Pengeluaran',
+                    ]),
+                TextColumn::make('nominal')
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                TextColumn::make('metode_pembayaran'),
+                TextColumn::make('keterangan')->limit(30),
+                ImageColumn::make('bukti_pembayaran')->height(100),
+            ])
+            ->filters([
+                // filter bulan & rentang tanggal kayak sebelumnya
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            TextColumn::make('nominal')
-                ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
-            TextColumn::make('metode_pembayaran'),
-            TextColumn::make('keterangan')->limit(30),
-            ImageColumn::make('bukti_pembayaran')->height(100),
-        ])
-        ->filters([
-            // filter bulan & rentang tanggal kayak sebelumnya
-        ])
-        ->actions([
-            Tables\Actions\EditAction::make(),
-        ])
-        ->bulkActions([
-            Tables\Actions\BulkActionGroup::make([
-                Tables\Actions\DeleteBulkAction::make(),
-            ]),
-        ]);
-}
+            ]);
+    }
 
 
     public static function getRelations(): array

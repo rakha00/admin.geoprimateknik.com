@@ -17,9 +17,9 @@ class BarangMasukResource extends Resource
 {
     protected static ?string $model = BarangMasuk::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-archive-box-arrow-down';
+    protected static ?string $navigationIcon = 'heroicon-o-arrow-down-on-square-stack';
     protected static ?string $navigationLabel = 'Barang Masuk';
-    protected static ?string $navigationGroup = 'Transaksi';
+    protected static ?string $navigationGroup = 'Inventori';
 
     public static function canViewAny(): bool
     {

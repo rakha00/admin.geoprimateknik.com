@@ -14,15 +14,15 @@ class PrincipleSubdealerResource extends Resource
 {
     protected static ?string $model = PrincipleSubdealer::class;
 
-    protected static ?string $navigationIcon  = 'heroicon-o-squares-plus';
-    protected static ?string $navigationLabel = 'Principle/Subdealer';
+    protected static ?string $navigationIcon = 'heroicon-o-truck';
+    protected static ?string $navigationLabel = 'Principle / Subdealer';
     protected static ?string $navigationGroup = 'Master Data';
     protected static ?string $recordTitleAttribute = 'nama';
 
-public static function canViewAny(): bool
-{
-    return auth()->user()->level == 1;
-}
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->level == 1;
+    }
 
     public static function form(Form $form): Form
     {
@@ -42,7 +42,7 @@ public static function canViewAny(): bool
                     ->label('No. HP')
                     ->required()
                     ->maxLength(20),
-                
+
                 Forms\Components\TextInput::make('alamat')
                     ->label('Alamat')
                     ->required()
@@ -107,9 +107,9 @@ public static function canViewAny(): bool
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListPrincipleSubdealers::route('/'),
+            'index' => Pages\ListPrincipleSubdealers::route('/'),
             'create' => Pages\CreatePrincipleSubdealer::route('/create'),
-            'edit'   => Pages\EditPrincipleSubdealer::route('/{record}/edit'),
+            'edit' => Pages\EditPrincipleSubdealer::route('/{record}/edit'),
         ];
     }
 }

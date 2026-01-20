@@ -15,8 +15,9 @@ class UnitAcResource extends Resource
 {
     protected static ?string $model = UnitAc::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
+    protected static ?string $navigationIcon = 'heroicon-o-cube';
     protected static ?string $navigationLabel = 'Unit AC';
+    protected static ?string $navigationGroup = 'Inventori';
 
     public static function canCreate(): bool
     {

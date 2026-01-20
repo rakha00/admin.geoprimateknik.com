@@ -12,25 +12,34 @@ class ProgressSKUResource extends Resource
 {
     protected static ?string $model = UnitAc::class;
 
-    
-    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
-    protected static ?string $navigationLabel = 'Progress SKU';
+
+    protected static ?string $navigationIcon = 'heroicon-o-qr-code';
+    protected static ?string $navigationLabel = 'Progres SKU';
     protected static ?string $navigationGroup = 'Laporan';
 
-    
-    public static function canCreate(): bool { return false; }
-    public static function canEdit($record): bool { return false; }
-    public static function canDelete($record): bool { return false; }
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+    public static function canEdit($record): bool
+    {
+        return false;
+    }
+    public static function canDelete($record): bool
+    {
+        return false;
+    }
 
     public static function canViewAny(): bool
-{
-    return auth()->user()->level == 1;
-}
+    {
+        return auth()->user()->level == 1;
+    }
 
-public static function shouldRegisterNavigation(): bool
-{
-    return false;
-}
+    // public static function shouldRegisterNavigation(): bool
+// {
+//     return false;
+// }
 
 
     public static function table(Table $table): Table
@@ -43,7 +52,8 @@ public static function shouldRegisterNavigation(): bool
 
                 TextColumn::make('total_terjual')
                     ->label('Total Terjual')
-                    ->getStateUsing(fn (UnitAc $record) =>
+                    ->getStateUsing(
+                        fn(UnitAc $record) =>
                         $record->transaksiProdukDetails->sum('jumlah_keluar')
                     )
                     ->sortable(),
@@ -74,7 +84,7 @@ public static function shouldRegisterNavigation(): bool
                         return $query;
                     }),
             ])
-            
+
             ->paginated(false); // Biar semua tampil di satu halaman
     }
 

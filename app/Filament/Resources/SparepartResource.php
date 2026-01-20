@@ -14,8 +14,9 @@ class SparepartResource extends Resource
 {
     protected static ?string $model = Sparepart::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
-    protected static ?string $navigationLabel = 'Spareparts';
+    protected static ?string $navigationIcon = 'heroicon-o-cog';
+    protected static ?string $navigationLabel = 'Sparepart';
+    protected static ?string $navigationGroup = 'Inventori';
 
     public static function form(Form $form): Form
     {

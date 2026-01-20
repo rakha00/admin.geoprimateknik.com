@@ -25,9 +25,9 @@ use Filament\Tables\Actions\EditAction;
 class NonPajakResource extends Resource
 {
     protected static ?string $model = NonPajak::class;
-    protected static ?string $navigationIcon = 'heroicon-o-banknotes';
+    protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
     protected static ?string $navigationGroup = 'Transaksi';
-    protected static ?string $navigationLabel = 'Transaksi Produk Non-Pajak';
+    protected static ?string $navigationLabel = 'Transaksi Non-Pajak';
 
     protected static ?string $recordTitleAttribute = 'no_invoice_non_pajak';
 

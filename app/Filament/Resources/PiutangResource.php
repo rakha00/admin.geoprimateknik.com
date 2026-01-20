@@ -21,8 +21,8 @@ class PiutangResource extends Resource
 {
     protected static ?string $model = Piutang::class;
 
-    protected static ?string $navigationGroup = 'Reminder';
-    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+    protected static ?string $navigationGroup = 'Keuangan';
+    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
     protected static ?string $navigationLabel = 'Piutang';
 
     public static function canViewAny(): bool

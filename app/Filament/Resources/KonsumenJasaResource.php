@@ -17,7 +17,7 @@ class KonsumenJasaResource extends Resource
 {
     protected static ?string $model = KonsumenJasa::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationLabel = 'Konsumen Jasa';
     protected static ?string $navigationGroup = 'Master Data';
     protected static ?string $pluralLabel = 'Konsumen Jasa';
