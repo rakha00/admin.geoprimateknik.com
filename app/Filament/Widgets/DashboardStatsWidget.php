@@ -6,6 +6,7 @@ use App\Models\NonPajak;
 use App\Models\Pajak;
 use App\Models\PengeluaranKantor;
 use App\Models\PengeluaranTransaksiProduk;
+use App\Models\PettyCash;
 use App\Models\SewaAC;
 use App\Models\SparepartKeluar;
 use App\Models\TransaksiJasa;
@@ -92,7 +93,7 @@ class DashboardStatsWidget extends BaseWidget
         });
         */
 
-        return Stat::make('Keuntungan Produk', 'Rp '.number_format($totalKeuntungan, 0, ',', '.'))
+        return Stat::make('Keuntungan Produk', 'Rp ' . number_format($totalKeuntungan, 0, ',', '.'))
             ->description("Keuntungan bulan $bulan/$tahun")
             ->descriptionIcon('heroicon-m-arrow-trending-up')
             ->color('success');
@@ -113,7 +114,7 @@ class DashboardStatsWidget extends BaseWidget
             return ($item->total_pendapatan_jasa ?? 0) - ($item->total_pengeluaran_jasa ?? 0);
         });
 
-        return Stat::make('Keuntungan Jasa', 'Rp '.number_format($total, 0, ',', '.'))
+        return Stat::make('Keuntungan Jasa', 'Rp ' . number_format($total, 0, ',', '.'))
             ->description("Keuntungan bulan $bulan/$tahun")
             ->descriptionIcon('heroicon-m-wrench-screwdriver')
             ->color('success');
@@ -134,7 +135,7 @@ class DashboardStatsWidget extends BaseWidget
             return ($item->pemasukan ?? 0) - ($item->pengeluaran ?? 0);
         });
 
-        return Stat::make('Keuntungan Sewa AC', 'Rp '.number_format($total, 0, ',', '.'))
+        return Stat::make('Keuntungan Sewa AC', 'Rp ' . number_format($total, 0, ',', '.'))
             ->description("Bulan $bulan/$tahun")
             ->descriptionIcon('heroicon-m-cpu-chip')
             ->color('info');
@@ -153,7 +154,7 @@ class DashboardStatsWidget extends BaseWidget
 
         $total = $query->sum('pengeluaran');
 
-        return Stat::make('Pengeluaran Kantor', 'Rp '.number_format($total, 0, ',', '.'))
+        return Stat::make('Pengeluaran Kantor', 'Rp ' . number_format($total, 0, ',', '.'))
             ->description("Bulan $bulan/$tahun")
             ->descriptionIcon('heroicon-m-building-office')
             ->color('warning');
@@ -172,7 +173,7 @@ class DashboardStatsWidget extends BaseWidget
 
         $total = $query->sum('pengeluaran');
 
-        return Stat::make('Pengeluaran Transaksi', 'Rp '.number_format($total, 0, ',', '.'))
+        return Stat::make('Pengeluaran Transaksi', 'Rp ' . number_format($total, 0, ',', '.'))
             ->description("Bulan $bulan/$tahun")
             ->descriptionIcon('heroicon-m-shopping-cart')
             ->color('warning');
@@ -207,7 +208,7 @@ class DashboardStatsWidget extends BaseWidget
         $kantorJuta = number_format($pengeluaranKantor / 1000000, 1);
         $transaksiJuta = number_format($pengeluaranTransaksi / 1000000, 1);
 
-        return Stat::make('Total Pengeluaran', 'Rp '.number_format($totalPengeluaran, 0, ',', '.'))
+        return Stat::make('Total Pengeluaran', 'Rp ' . number_format($totalPengeluaran, 0, ',', '.'))
             ->description("Kantor: {$kantorJuta}jt | Transaksi: {$transaksiJuta}jt")
             ->descriptionIcon('heroicon-m-banknotes')
             ->color('danger');
@@ -278,7 +279,7 @@ class DashboardStatsWidget extends BaseWidget
             }
         }
 
-        return Stat::make('Total Gaji Semua Karyawan', 'Rp '.number_format($total, 0, ',', '.'))
+        return Stat::make('Total Gaji Semua Karyawan', 'Rp ' . number_format($total, 0, ',', '.'))
             ->description("Total gaji karyawan aktif bulan $bulan/$tahun")
             ->descriptionIcon('heroicon-m-wallet')
             ->color('warning');
@@ -295,7 +296,7 @@ class DashboardStatsWidget extends BaseWidget
 
         $totalBersih = $keuntunganProduk + $keuntunganJasa + $keuntunganSewaAC - $pengeluaranKantor - $pengeluaranTransaksi;
 
-        return Stat::make('Total Keuntungan Bersih', 'Rp '.number_format($totalBersih, 0, ',', '.'))
+        return Stat::make('Total Keuntungan Bersih', 'Rp ' . number_format($totalBersih, 0, ',', '.'))
             ->description("Total bersih bulan $bulan/$tahun")
             ->descriptionIcon('heroicon-m-banknotes')
             ->color($totalBersih >= 0 ? 'success' : 'danger');
@@ -499,12 +500,25 @@ class DashboardStatsWidget extends BaseWidget
             return $transaksi->details->sum('total_harga_jual');
         });
 
-        $pemasukan = $pemasukanPajak + $pemasukanNonPajak + $pemasukanSewaAC + $pemasukanSparepart;
+        // Petty Cash (Pemasukan)
+        $queryPettyCashMasuk = PettyCash::query()
+            ->where('metode_pembayaran', $paymentType)
+            ->where('kategori', 'Pemasukan');
+        if ($bulan) {
+            $queryPettyCashMasuk->whereMonth('tanggal', $bulan);
+        }
+        if ($tahun) {
+            $queryPettyCashMasuk->whereYear('tanggal', $tahun);
+        }
+        $pemasukanPettyCash = $queryPettyCashMasuk->sum('nominal');
+
+        $pemasukan = $pemasukanPajak + $pemasukanNonPajak + $pemasukanSewaAC + $pemasukanSparepart + $pemasukanPettyCash;
 
         // Hitung total pengeluaran
         $pengeluaran = 0;
         $pengeluaranTransaksi = 0;
         $pengeluaranKantor = 0;
+        $pengeluaranPettyCash = 0;
 
         // Pengeluaran Transaksi Produk
         $queryPengTrans = PengeluaranTransaksiProduk::query()->where('pembayaran', $paymentType);
@@ -526,7 +540,19 @@ class DashboardStatsWidget extends BaseWidget
         }
         $pengeluaranKantor = $queryPengKantor->sum('pengeluaran');
 
-        $pengeluaran = $pengeluaranTransaksi + $pengeluaranKantor;
+        // Petty Cash (Pengeluaran)
+        $queryPettyCashKeluar = PettyCash::query()
+            ->where('metode_pembayaran', $paymentType)
+            ->where('kategori', 'Pengeluaran');
+        if ($bulan) {
+            $queryPettyCashKeluar->whereMonth('tanggal', $bulan);
+        }
+        if ($tahun) {
+            $queryPettyCashKeluar->whereYear('tanggal', $tahun);
+        }
+        $pengeluaranPettyCash = $queryPettyCashKeluar->sum('nominal');
+
+        $pengeluaran = $pengeluaranTransaksi + $pengeluaranKantor + $pengeluaranPettyCash;
 
         // Hitung net income
         $netIncome = $pemasukan - $pengeluaran;
@@ -546,7 +572,7 @@ class DashboardStatsWidget extends BaseWidget
             -(int) ($pengeluaranKantor / 1000000),
         ];
 
-        return Stat::make("Net Income $paymentType", 'Rp '.number_format($netIncome, 0, ',', '.'))
+        return Stat::make("Net Income $paymentType", 'Rp ' . number_format($netIncome, 0, ',', '.'))
             ->description($description)
             ->descriptionIcon($icon)
             ->chart($chartData) // Mini chart untuk visualisasi
@@ -605,6 +631,11 @@ class DashboardStatsWidget extends BaseWidget
                 return $transaksi->details->sum('total_harga_jual');
             });
 
+        // Petty Cash (Pemasukan) (all-time)
+        $pemasukan += PettyCash::where('metode_pembayaran', '=', $paymentType, 'and')
+            ->where('kategori', '=', 'Pemasukan', 'and')
+            ->sum('nominal');
+
         // Hitung total ALL-TIME pengeluaran
         $pengeluaran = 0;
 
@@ -616,12 +647,17 @@ class DashboardStatsWidget extends BaseWidget
         $pengeluaran += PengeluaranKantor::where('pembayaran', '=', $paymentType, 'and')
             ->sum('pengeluaran');
 
+        // Petty Cash (Pengeluaran) (all-time)
+        $pengeluaran += PettyCash::where('metode_pembayaran', '=', $paymentType, 'and')
+            ->where('kategori', '=', 'Pengeluaran', 'and')
+            ->sum('nominal');
+
         // Total Saldo
         $totalSaldo = $pemasukan - $pengeluaran;
 
         // Format untuk jutaan
         $saldoJuta = number_format($totalSaldo / 1000000, 1);
 
-        return Stat::make("💰 Saldo $paymentType", 'Rp '.number_format($totalSaldo, 0, ',', '.'));
+        return Stat::make("💰 Saldo $paymentType", 'Rp ' . number_format($totalSaldo, 0, ',', '.'));
     }
 }
