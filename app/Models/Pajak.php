@@ -9,6 +9,20 @@ class Pajak extends Model
 {
     use HasFactory;
 
+    protected static function booted()
+    {
+        static::saved(function ($pajak) {
+            // Jika status berubah, hitung ulang stok unit terkait
+            if ($pajak->isDirty('status')) {
+                foreach ($pajak->details as $detail) {
+                    if ($detail->unitAc) {
+                        $detail->unitAc->recalculateStock();
+                    }
+                }
+            }
+        });
+    }
+
     protected $fillable = [
         'no_invoice',
         'no_surat_jalan',
@@ -17,6 +31,7 @@ class Pajak extends Model
         'toko_id',
         'pembayaran',
         'remarks',
+        'status',
     ];
 
     public function details()

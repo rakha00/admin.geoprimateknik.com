@@ -75,6 +75,12 @@ class DashboardStatsWidget extends BaseWidget
         }
 
         $transaksis = $query->with('details')->get();
+
+        // REFACTOR: Call helper instead? No, helper returns float, this returns Stat.
+        // Let's reuse the calculation logic.
+        $totalKeuntungan = $this->hitungKeuntunganProduk($bulan, $tahun);
+
+        /* Old logic removed
         $totalKeuntungan = $transaksis->sum(function ($transaksi) {
             return $transaksi->details->sum(function ($detail) {
                 $modal = $detail->harga_modal * $detail->jumlah_keluar;
@@ -83,6 +89,7 @@ class DashboardStatsWidget extends BaseWidget
                 return $jual - $modal;
             });
         });
+        */
 
         return Stat::make('Keuntungan Produk', 'Rp '.number_format($totalKeuntungan, 0, ',', '.'))
             ->description("Keuntungan bulan $bulan/$tahun")
@@ -296,6 +303,7 @@ class DashboardStatsWidget extends BaseWidget
     // Helper methods untuk perhitungan
     private function hitungKeuntunganProduk($bulan, $tahun)
     {
+        // 1. Dari TransaksiProduk (Existing Logic - if still used)
         $query = TransaksiProduk::query();
         if ($bulan) {
             $query->whereMonth('tanggal', $bulan);
@@ -304,14 +312,43 @@ class DashboardStatsWidget extends BaseWidget
             $query->whereYear('tanggal', $tahun);
         }
 
-        return $query->with('details')->get()->sum(function ($transaksi) {
+        $keuntunganTransaksiProduk = $query->with('details')->get()->sum(function ($transaksi) {
             return $transaksi->details->sum(function ($detail) {
-                $modal = $detail->harga_modal * $detail->jumlah_keluar;
-                $jual = $detail->harga_jual * $detail->jumlah_keluar;
-
-                return $jual - $modal;
+                return ($detail->harga_jual * $detail->jumlah_keluar) - ($detail->harga_modal * $detail->jumlah_keluar);
             });
         });
+
+        // 2. Dari Pajak (Status Selesai)
+        $queryPajak = Pajak::where('status', '=', 'Selesai', 'and');
+        if ($bulan) {
+            $queryPajak->whereMonth('tanggal', $bulan);
+        }
+        if ($tahun) {
+            $queryPajak->whereYear('tanggal', $tahun);
+        }
+
+        $keuntunganPajak = $queryPajak->with('details')->get()->sum(function ($transaksi) {
+            return $transaksi->details->sum(function ($detail) {
+                return ($detail->harga_jual * $detail->jumlah_keluar) - ($detail->harga_modal * $detail->jumlah_keluar);
+            });
+        });
+
+        // 3. Dari NonPajak (Assuming always valid or add filter if needed)
+        $queryNonPajak = NonPajak::query();
+        if ($bulan) {
+            $queryNonPajak->whereMonth('tanggal', $bulan);
+        }
+        if ($tahun) {
+            $queryNonPajak->whereYear('tanggal', $tahun);
+        }
+
+        $keuntunganNonPajak = $queryNonPajak->with('details')->get()->sum(function ($transaksi) {
+            return $transaksi->details->sum(function ($detail) {
+                return ($detail->harga_jual * $detail->jumlah_keluar) - ($detail->harga_modal * $detail->jumlah_keluar);
+            });
+        });
+
+        return $keuntunganTransaksiProduk + $keuntunganPajak + $keuntunganNonPajak;
     }
 
     private function hitungKeuntunganJasa($bulan, $tahun)
@@ -402,6 +439,7 @@ class DashboardStatsWidget extends BaseWidget
         if ($tahun) {
             $queryPajak->whereYear('tanggal', $tahun);
         }
+        $queryPajak->where('status', '=', 'Selesai');
         $pemasukanPajak = $queryPajak->with('details')->get()->sum(function ($transaksi) {
             return $transaksi->details->sum('total_harga_jual');
         });
@@ -506,6 +544,7 @@ class DashboardStatsWidget extends BaseWidget
 
         // Pajak (all-time)
         $pemasukan += Pajak::where('pembayaran', $paymentType)
+            ->where('status', '=', 'Selesai')
             ->with('details')
             ->get()
             ->sum(function ($transaksi) {
@@ -541,9 +580,6 @@ class DashboardStatsWidget extends BaseWidget
         // Format untuk jutaan
         $saldoJuta = number_format($totalSaldo / 1000000, 1);
 
-        return Stat::make("💰 Saldo $paymentType", 'Rp '.number_format($totalSaldo, 0, ',', '.'))
-            ->description("Total keseluruhan: Rp {$saldoJuta}jt")
-            ->descriptionIcon($icon)
-            ->color($totalSaldo >= 0 ? $color : 'danger');
+        return Stat::make("💰 Saldo $paymentType", 'Rp '.number_format($totalSaldo, 0, ',', '.'));
     }
 }

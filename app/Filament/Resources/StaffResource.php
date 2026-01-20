@@ -74,32 +74,32 @@ class StaffResource extends Resource
                 TextColumn::make('no_hp'),
                 TextColumn::make('status')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'aktif' => 'success',
                         'tidak aktif' => 'danger',
                     }),
 
                 TextColumn::make('gaji_pokok')
                     ->money('IDR', divideBy: 1, locale: 'id')
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 // === Lembur ===
                 TextColumn::make('lembur')
                     ->label('Lembur')
-                    ->state(fn($record, $livewire) => self::sumDetailFiltered($record, 'lembur', $livewire))
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->state(fn ($record, $livewire) => self::sumDetailFiltered($record, 'lembur', $livewire))
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 // === Bonus ===
                 TextColumn::make('bonus')
                     ->label('Bonus')
-                    ->state(fn($record, $livewire) => self::sumDetailFiltered($record, 'bonus', $livewire))
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->state(fn ($record, $livewire) => self::sumDetailFiltered($record, 'bonus', $livewire))
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 // === Kasbon ===
                 TextColumn::make('kasbon')
                     ->label('Kasbon')
-                    ->state(fn($record, $livewire) => self::sumDetailFiltered($record, 'kasbon', $livewire))
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->state(fn ($record, $livewire) => self::sumDetailFiltered($record, 'kasbon', $livewire))
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 // === Total Gaji ===
                 TextColumn::make('total_gaji')
@@ -110,7 +110,7 @@ class StaffResource extends Resource
 
                         return $record->gaji_pokok + $lembur + $bonus;
                     })
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 // === Gaji Diterima ===
                 TextColumn::make('gaji_diterima')
@@ -122,7 +122,7 @@ class StaffResource extends Resource
 
                         return $record->gaji_pokok + $lembur + $bonus - $kasbon;
                     })
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 TextColumn::make('terakhir_aktif')->date(),
             ])
@@ -176,9 +176,9 @@ class StaffResource extends Resource
             ->filter(function ($detail) use ($bulan, $from, $until) {
                 $tanggal = $detail->tanggal ? Carbon::parse($detail->tanggal) : null;
 
-                return (!$bulan || ($tanggal && $tanggal->month == $bulan))
-                    && (!$from || ($tanggal && $tanggal->gte(Carbon::parse($from))))
-                    && (!$until || ($tanggal && $tanggal->lte(Carbon::parse($until))));
+                return (! $bulan || ($tanggal && $tanggal->month == $bulan))
+                    && (! $from || ($tanggal && $tanggal->gte(Carbon::parse($from))))
+                    && (! $until || ($tanggal && $tanggal->lte(Carbon::parse($until))));
             })
             ->sum($field);
     }

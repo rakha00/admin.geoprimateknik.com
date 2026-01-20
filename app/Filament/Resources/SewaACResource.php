@@ -62,8 +62,8 @@ class SewaACResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('tanggal')->date()->sortable(),
-                TextColumn::make('pemasukan')->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
-                TextColumn::make('pengeluaran')->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                TextColumn::make('pemasukan')->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
+                TextColumn::make('pengeluaran')->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
                 TextColumn::make('pembayaran')->sortable(),
             ])
             ->filters([
@@ -75,8 +75,8 @@ class SewaACResource extends Resource
                     ])
                     ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data): \Illuminate\Database\Eloquent\Builder {
                         return $query
-                            ->when($data['from'], fn($q, $from) => $q->whereDate('tanggal', '>=', $from))
-                            ->when($data['until'], fn($q, $until) => $q->whereDate('tanggal', '<=', $until));
+                            ->when($data['from'], fn ($q, $from) => $q->whereDate('tanggal', '>=', $from))
+                            ->when($data['until'], fn ($q, $until) => $q->whereDate('tanggal', '<=', $until));
                     }),
 
             ])

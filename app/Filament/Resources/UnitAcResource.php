@@ -79,18 +79,18 @@ class UnitAcResource extends Resource
                     ->searchable(),
                 TextColumn::make('harga_modal')
                     ->label('Harga Modal')
-                    ->formatStateUsing(fn($state): string => number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state): string => number_format($state, 0, ',', '.')),
                 // 1) Stock Awal
                 TextColumn::make('stock_awal')
                     ->label('Stock Awal')
-                    ->visible(fn() => auth()->user()->level == 1),
+                    ->visible(fn () => auth()->user()->level == 1),
 
                 // 2) Stock Masuk = SUM(jumlah_barang_masuk)
                 TextColumn::make('stock_masuk')
                     ->label('Stock Masuk')
-                    ->visible(fn() => auth()->user()->level == 1)
+                    ->visible(fn () => auth()->user()->level == 1)
                     ->getStateUsing(
-                        fn(UnitAc $record): int => $record->barangMasukDetails()
+                        fn (UnitAc $record): int => $record->barangMasukDetails()
                             ->whereHas('barangMasuk', function ($q) {
                                 $q->where('status', 'Selesai');
                             })
@@ -100,12 +100,44 @@ class UnitAcResource extends Resource
                 // 3) Stock Keluar = SUM(jumlah_keluar)
                 TextColumn::make('stok_keluar')
                     ->label('Stock Keluar')
-                    ->visible(fn() => auth()->user()->level == 1)
+                    ->visible(fn () => auth()->user()->level == 1)
+                    ->getStateUsing(function (UnitAc $record) {
+                        $keluarTransaksi = $record->transaksiProdukDetails()->sum('jumlah_keluar');
+                        $keluarPajak = $record->pajakDetails()
+                            ->whereHas('pajak', function ($q) {
+                                $q->where('status', 'Selesai');
+                            })
+                            ->sum('jumlah_keluar');
+                        $keluarNonPajak = $record->nonPajakDetails()->sum('jumlah_keluar');
+
+                        return $keluarTransaksi + $keluarPajak + $keluarNonPajak;
+                    })
                     ->sortable(),
 
                 // 4) Stock Akhir = Awal + Masuk − Keluar
                 TextColumn::make('stok_akhir')
                     ->label('Stock Akhir')
+                    ->visible(fn () => auth()->user()->level == 1)
+                    ->getStateUsing(function (UnitAc $record) {
+                        // Masuk
+                        $masuk = $record->barangMasukDetails()
+                            ->whereHas('barangMasuk', function ($q) {
+                                $q->where('status', 'Selesai');
+                            })
+                            ->sum('jumlah_barang_masuk');
+
+                        // Keluar
+                        $keluarTransaksi = $record->transaksiProdukDetails()->sum('jumlah_keluar');
+                        $keluarPajak = $record->pajakDetails()
+                            ->whereHas('pajak', function ($q) {
+                                $q->where('status', 'Selesai');
+                            })
+                            ->sum('jumlah_keluar');
+                        $keluarNonPajak = $record->nonPajakDetails()->sum('jumlah_keluar');
+                        $keluar = $keluarTransaksi + $keluarPajak + $keluarNonPajak;
+
+                        return ($record->stock_awal ?? 0) + $masuk - $keluar;
+                    })
                     ->sortable(),
 
             ])
@@ -114,7 +146,7 @@ class UnitAcResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make()
-                    ->visible(fn() => auth()->user()->level == 1),
+                    ->visible(fn () => auth()->user()->level == 1),
             ]);
     }
 

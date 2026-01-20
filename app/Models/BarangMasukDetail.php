@@ -117,7 +117,7 @@ class BarangMasukDetail extends Model
     public function syncUtang()
     {
         $barangMasuk = $this->barangMasuk;
-        if (!$barangMasuk || $barangMasuk->status !== 'Selesai') {
+        if (! $barangMasuk || $barangMasuk->status !== 'Selesai') {
             return;
         }
 

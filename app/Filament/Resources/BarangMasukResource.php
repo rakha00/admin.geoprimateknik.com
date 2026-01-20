@@ -50,7 +50,7 @@ class BarangMasukResource extends Resource
                     ->required()
                     ->reactive()
                     ->afterStateUpdated(function ($state, $get, $set) {
-                        if (!$state) {
+                        if (! $state) {
                             return;
                         }
                         $d = Carbon::parse($state)->format('dmY');
@@ -137,8 +137,8 @@ class BarangMasukResource extends Resource
                     ])
                     ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data): \Illuminate\Database\Eloquent\Builder {
                         return $query
-                            ->when($data['from'], fn($q, $from) => $q->whereDate('tanggal', '>=', $from))
-                            ->when($data['until'], fn($q, $until) => $q->whereDate('tanggal', '<=', $until));
+                            ->when($data['from'], fn ($q, $from) => $q->whereDate('tanggal', '>=', $from))
+                            ->when($data['until'], fn ($q, $until) => $q->whereDate('tanggal', '<=', $until));
                     }),
 
             ])
@@ -147,8 +147,8 @@ class BarangMasukResource extends Resource
                     ->label('Tandai Selesai')
                     ->icon('heroicon-o-check')
                     ->requiresConfirmation()
-                    ->visible(fn(BarangMasuk $record) => $record->status === 'PO')
-                    ->action(fn(BarangMasuk $record) => $record->update(['status' => 'Selesai'])),
+                    ->visible(fn (BarangMasuk $record) => $record->status === 'PO')
+                    ->action(fn (BarangMasuk $record) => $record->update(['status' => 'Selesai'])),
                 Tables\Actions\EditAction::make(),
             ])
             ->headerActions([

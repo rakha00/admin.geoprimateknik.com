@@ -70,61 +70,61 @@ class HelperResource extends Resource
                 TextColumn::make('no_hp'),
                 TextColumn::make('status')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'aktif' => 'success',
                         'tidak aktif' => 'danger',
                     }),
 
                 TextColumn::make('gaji_pokok')
                     ->label('Gaji Pokok')
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 TextColumn::make('lembur')
                     ->label('Lembur')
                     ->state(
-                        fn($record, $livewire) => $record->sumDetail(
+                        fn ($record, $livewire) => $record->sumDetail(
                             'lembur',
                             $livewire->tableFilters['bulan']['value'] ?? null,
                             $livewire->tableFilters['tanggal']['from'] ?? null,
                             $livewire->tableFilters['tanggal']['until'] ?? null
                         )
                     )
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 TextColumn::make('bonus')
                     ->label('Bonus')
                     ->state(
-                        fn($record, $livewire) => $record->sumDetail(
+                        fn ($record, $livewire) => $record->sumDetail(
                             'bonus',
                             $livewire->tableFilters['bulan']['value'] ?? null,
                             $livewire->tableFilters['tanggal']['from'] ?? null,
                             $livewire->tableFilters['tanggal']['until'] ?? null
                         )
                     )
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 TextColumn::make('kasbon')
                     ->label('Kasbon')
                     ->state(
-                        fn($record, $livewire) => $record->sumDetail(
+                        fn ($record, $livewire) => $record->sumDetail(
                             'kasbon',
                             $livewire->tableFilters['bulan']['value'] ?? null,
                             $livewire->tableFilters['tanggal']['from'] ?? null,
                             $livewire->tableFilters['tanggal']['until'] ?? null
                         )
                     )
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 TextColumn::make('gaji_diterima')
                     ->label('Gaji Diterima')
                     ->state(
-                        fn($record, $livewire) => $record->hitungGajiDiterima(
+                        fn ($record, $livewire) => $record->hitungGajiDiterima(
                             $livewire->tableFilters['bulan']['value'] ?? null,
                             $livewire->tableFilters['tanggal']['from'] ?? null,
                             $livewire->tableFilters['tanggal']['until'] ?? null
                         )
                     )
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 TextColumn::make('terakhir_aktif')->date(),
             ])
@@ -135,7 +135,7 @@ class HelperResource extends Resource
                         \Filament\Forms\Components\DatePicker::make('from')->label('Dari'),
                         \Filament\Forms\Components\DatePicker::make('until')->label('Sampai'),
                     ])
-                    ->query(fn($query, $data) => $query),
+                    ->query(fn ($query, $data) => $query),
             ]);
     }
 

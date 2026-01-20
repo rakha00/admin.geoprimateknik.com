@@ -98,6 +98,15 @@ class PajakResource extends Resource
                 ->label('Keterangan')
                 ->rows(3)
                 ->columnSpanFull(),
+
+            Select::make('status')
+                ->label('Status')
+                ->options([
+                    'Belum Selesai' => 'Belum Selesai',
+                    'Selesai' => 'Selesai',
+                ])
+                ->default('Belum Selesai')
+                ->required(),
         ]);
     }
 
@@ -148,7 +157,7 @@ class PajakResource extends Resource
         $yy = $date->format('y');
         $romanMonth = self::getRomanMonth($date->month);
 
-        $query = Pajak::withTrashed()->whereYear('tanggal', $year);
+        $query = Pajak::whereYear('tanggal', '=', $year, 'and');
         if ($ignoreId) {
             $query->where('id', '!=', $ignoreId);
         }
@@ -179,6 +188,13 @@ class PajakResource extends Resource
             ->columns([
                 TextColumn::make('no_invoice')->label('Invoice')->sortable(),
                 TextColumn::make('no_surat_jalan')->label('Surat Jalan')->sortable(),
+                TextColumn::make('pembayaran')->label('Pembayaran'),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Selesai' => 'success',
+                        'Belum Selesai' => 'warning',
+                    }),
                 TextColumn::make('tanggal')->label('Tanggal')->date()->sortable(),
                 TextColumn::make('sales.nama')->label('Sales')->sortable(),
                 TextColumn::make('toko.nama_konsumen')->label('Toko/Konsumen')->sortable(),

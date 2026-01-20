@@ -12,6 +12,7 @@ class BarangMasuk extends Model
         'nomor_barang_masuk',
         'status',
     ];
+
     protected static function booted()
     {
         static::saved(function ($barangMasuk) {

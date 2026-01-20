@@ -85,7 +85,11 @@ class UnitAc extends Model
         //    - PajakDetail
         //    - NonPajakDetail
         $keluarTransaksi = $this->transaksiProdukDetails()->sum('jumlah_keluar');
-        $keluarPajak = $this->pajakDetails()->sum('jumlah_keluar');
+        $keluarPajak = $this->pajakDetails()
+            ->whereHas('pajak', function ($q) {
+                $q->where('status', 'Selesai');
+            })
+            ->sum('jumlah_keluar');
         $keluarNonPajak = $this->nonPajakDetails()->sum('jumlah_keluar');
 
         $totalKeluar = $keluarTransaksi + $keluarPajak + $keluarNonPajak;
