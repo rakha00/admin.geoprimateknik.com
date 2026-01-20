@@ -54,8 +54,9 @@ class SparepartKeluarDetail extends Model
     protected function syncPiutang()
     {
         $sparepartKeluar = $this->sparepartKeluar;
-        if (!$sparepartKeluar)
+        if (! $sparepartKeluar) {
             return;
+        }
 
         $totalHargaJual = $sparepartKeluar->details()->sum('total_harga_jual');
 
@@ -64,7 +65,7 @@ class SparepartKeluarDetail extends Model
             [
                 'due_date' => $sparepartKeluar->tanggal,
                 'total_harga_modal' => $totalHargaJual, // Note: Logic might need adjustment if total_harga_modal means something else in Piutang context, but following pattern.
-                // Wait, in Piutang model, total_harga_modal seems to be the total amount to be paid? 
+                // Wait, in Piutang model, total_harga_modal seems to be the total amount to be paid?
                 // In PajakDetail: $piutang->total_harga_modal = $pajak->details->sum(fn($d) => $d->total_harga_jual ?? ($d->harga_jual * $d->jumlah_keluar));
                 // So it is the total sales amount.
                 'status_pembayaran' => 'belum lunas',

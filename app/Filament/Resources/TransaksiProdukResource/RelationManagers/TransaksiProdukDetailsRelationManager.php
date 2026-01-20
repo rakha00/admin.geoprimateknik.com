@@ -5,20 +5,21 @@ namespace App\Filament\Resources\TransaksiProdukResource\RelationManagers;
 use App\Models\UnitAc;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
 
 class TransaksiProdukDetailsRelationManager extends RelationManager
 {
     protected static string $relationship = 'details';
+
     protected static ?string $recordTitleAttribute = 'sku';
 
     public function form(Forms\Form $form): Forms\Form
@@ -35,11 +36,12 @@ class TransaksiProdukDetailsRelationManager extends RelationManager
                         if (! $state) {
                             $set('nama_unit', '');
                             $set('harga_modal', 0);
+
                             return;
                         }
 
                         $unit = UnitAc::where('sku', $state)->first();
-                        $set('nama_unit',   $unit->nama_unit   ?? '');
+                        $set('nama_unit', $unit->nama_unit ?? '');
                         $set('harga_modal', $unit->harga_modal ?? 0);
                     }),
 
@@ -108,10 +110,10 @@ class TransaksiProdukDetailsRelationManager extends RelationManager
         $hargaModal = (float) ($data['harga_modal'] ?? 0);
         $hargaJual = (float) ($data['harga_jual'] ?? 0);
         $jumlahKeluar = (int) ($data['jumlah_keluar'] ?? 0);
-        
+
         $data['total_modal'] = $hargaModal * $jumlahKeluar;
         $data['total_harga_jual'] = $hargaJual * $jumlahKeluar; // FIXED: Ini yang salah sebelumnya
-       
+
         return $data;
     }
 
@@ -124,10 +126,10 @@ class TransaksiProdukDetailsRelationManager extends RelationManager
         $hargaModal = (float) ($data['harga_modal'] ?? 0);
         $hargaJual = (float) ($data['harga_jual'] ?? 0);
         $jumlahKeluar = (int) ($data['jumlah_keluar'] ?? 0);
-        
+
         $data['total_modal'] = $hargaModal * $jumlahKeluar;
         $data['total_harga_jual'] = $hargaJual * $jumlahKeluar; // FIXED: Ini yang salah sebelumnya
-       
+
         return $data;
     }
 
@@ -156,15 +158,13 @@ class TransaksiProdukDetailsRelationManager extends RelationManager
                 // Menampilkan total dari database (jika ada) atau perhitungan manual
                 TextColumn::make('total_modal')
                     ->label('Total Harga Modal')
-                    ->getStateUsing(fn ($record) =>
-                        $record->total_modal ?? ($record->harga_modal * $record->jumlah_keluar)
+                    ->getStateUsing(fn ($record) => $record->total_modal ?? ($record->harga_modal * $record->jumlah_keluar)
                     )
                     ->formatStateUsing(fn (int $state): string => number_format($state, 0, ',', '.')),
 
                 TextColumn::make('total_harga_jual')
                     ->label('Total Harga Jual')
-                    ->getStateUsing(fn ($record) =>
-                        $record->total_harga_jual ?? ($record->harga_jual * $record->jumlah_keluar)
+                    ->getStateUsing(fn ($record) => $record->total_harga_jual ?? ($record->harga_jual * $record->jumlah_keluar)
                     )
                     ->formatStateUsing(fn (int $state): string => number_format($state, 0, ',', '.')),
 
@@ -173,10 +173,11 @@ class TransaksiProdukDetailsRelationManager extends RelationManager
                     ->getStateUsing(function ($record) {
                         $totalJual = $record->total_harga_jual ?? ($record->harga_jual * $record->jumlah_keluar);
                         $totalModal = $record->total_modal ?? ($record->harga_modal * $record->jumlah_keluar);
+
                         return $totalJual - $totalModal;
                     })
                     ->formatStateUsing(fn (int $state): string => number_format($state, 0, ',', '.')),
-                   
+
             ])
             ->headerActions([
                 CreateAction::make(),

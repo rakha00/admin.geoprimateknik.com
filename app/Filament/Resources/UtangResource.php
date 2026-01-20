@@ -3,27 +3,29 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UtangResource\Pages;
-use App\Filament\Resources\UtangResource\RelationManagers;
+use App\Models\BarangMasuk;
 use App\Models\Utang;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Models\BarangMasuk;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 
 class UtangResource extends Resource
 {
     protected static ?string $model = Utang::class;
 
     protected static ?string $navigationGroup = 'Keuangan';
+
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
+
     protected static ?string $navigationLabel = 'Utang';
+
     protected static ?string $pluralModelLabel = 'Utang';
+
     protected static ?int $navigationSort = 2;
 
     public static function canViewAny(): bool
@@ -40,10 +42,10 @@ class UtangResource extends Resource
                     ->options(
                         BarangMasuk::with('principleSubdealer')
                             ->get()
-                            ->mapWithKeys(fn($bm) => [
-                                $bm->id => $bm->nomor_barang_masuk . ' | ' .
-                                    \Carbon\Carbon::parse($bm->tanggal)->format('d-m-Y') . ' - ' .
-                                    $bm->principleSubdealer->nama
+                            ->mapWithKeys(fn ($bm) => [
+                                $bm->id => $bm->nomor_barang_masuk.' | '.
+                                    \Carbon\Carbon::parse($bm->tanggal)->format('d-m-Y').' - '.
+                                    $bm->principleSubdealer->nama,
                             ])
                     )
                     ->searchable()
@@ -58,10 +60,11 @@ class UtangResource extends Resource
                                 $totalHargaModal = $barangMasuk->barangMasukDetails->sum(function ($detail) {
                                     $harga = $detail->harga_modal ?? 0;
                                     $jumlah = $detail->jumlah_barang_masuk ?? 0;
+
                                     return $harga * $jumlah;
                                 });
 
-                                $set('total_harga_modal_display', 'Rp ' . number_format($totalHargaModal, 0, ',', '.'));
+                                $set('total_harga_modal_display', 'Rp '.number_format($totalHargaModal, 0, ',', '.'));
                                 $set('nama_principle_display', $barangMasuk->principleSubdealer->nama ?? '');
                             }
                         } else {
@@ -77,28 +80,29 @@ class UtangResource extends Resource
                     ->formatStateUsing(function ($state, Get $get, $record = null) {
                         // Jika sedang edit (record tersedia), ambil dari field `total_harga_modal`
                         if ($record && $record->total_harga_modal !== null) {
-                            return 'Rp ' . number_format($record->total_harga_modal, 0, ',', '.');
+                            return 'Rp '.number_format($record->total_harga_modal, 0, ',', '.');
                         }
 
                         // Jika create (tidak ada record), hitung manual berdasarkan barang_masuk_id
                         $barangMasukId = $get('barang_masuk_id');
-                        if (!$barangMasukId)
+                        if (! $barangMasukId) {
                             return '';
+                        }
 
                         $barangMasuk = \App\Models\BarangMasuk::with('barangMasukDetails.unitAc')->find($barangMasukId);
-                        if (!$barangMasuk)
+                        if (! $barangMasuk) {
                             return '';
+                        }
 
                         $totalHargaModal = $barangMasuk->barangMasukDetails->sum(function ($detail) {
                             $hargaModal = $detail->unitAc->harga_modal ?? 0;
                             $jumlah = $detail->jumlah_barang_masuk ?? 0;
+
                             return $hargaModal * $jumlah;
                         });
 
-                        return 'Rp ' . number_format($totalHargaModal, 0, ',', '.');
+                        return 'Rp '.number_format($totalHargaModal, 0, ',', '.');
                     }),
-
-
 
                 Forms\Components\TextInput::make('nama_principle_display')
                     ->label('Nama Principle')
@@ -106,10 +110,12 @@ class UtangResource extends Resource
                     ->dehydrated(false)
                     ->formatStateUsing(function ($state, Get $get, $record = null) {
                         $barangMasukId = $get('barang_masuk_id') ?? $record?->barang_masuk_id;
-                        if (!$barangMasukId)
+                        if (! $barangMasukId) {
                             return '';
+                        }
 
                         $barangMasuk = BarangMasuk::with('principleSubdealer')->find($barangMasukId);
+
                         return $barangMasuk?->principleSubdealer?->nama ?? '';
                     }),
 
@@ -122,9 +128,11 @@ class UtangResource extends Resource
                     ->disabled()
                     ->dehydrated(false)
                     ->formatStateUsing(function ($state, $record = null) {
-                        if (!$record)
-                            return 'Rp 0'; // Untuk create form
-                        return 'Rp ' . number_format($record->sudah_dibayar ?? 0, 0, ',', '.');
+                        if (! $record) {
+                            return 'Rp 0';
+                        } // Untuk create form
+
+                        return 'Rp '.number_format($record->sudah_dibayar ?? 0, 0, ',', '.');
                     }),
 
                 Forms\Components\TextInput::make('pembayaran_baru')
@@ -140,7 +148,7 @@ class UtangResource extends Resource
 
                         $set('sudah_dibayar', $totalBaru);
                         // Hapus update display karena sudah ada formatStateUsing
-            
+
                         if ($state) {
                             $barangMasuk = BarangMasuk::with('barangMasukDetails.unitAc', 'principleSubdealer')->find($state);
 
@@ -148,10 +156,11 @@ class UtangResource extends Resource
                                 $totalHargaModal = $barangMasuk->barangMasukDetails->sum(function ($detail) {
                                     $harga = $detail->unitAc->harga_modal ?? 0;
                                     $jumlah = $detail->jumlah_barang_masuk ?? 0;
+
                                     return $harga * $jumlah;
                                 });
 
-                                $set('total_harga_modal_display', 'Rp ' . number_format($totalHargaModal, 0, ',', '.'));
+                                $set('total_harga_modal_display', 'Rp '.number_format($totalHargaModal, 0, ',', '.'));
                                 $set('nama_principle_display', $barangMasuk->principleSubdealer->nama ?? '');
                             }
                         } else {
@@ -199,12 +208,11 @@ class UtangResource extends Resource
 
                 Tables\Columns\TextColumn::make('total_harga_modal')
                     ->label('Total Harga Modal')
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
-
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 Tables\Columns\TextColumn::make('sudah_dibayar')
                     ->label('Sudah Dibayar')
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 Tables\Columns\TextColumn::make('due_date')
                     ->label('Jatuh Tempo')
@@ -217,11 +225,10 @@ class UtangResource extends Resource
                         'success' => 'sudah lunas',
                     ])
                     ->label('Status')
-                    ->formatStateUsing(fn($state) => ucwords($state)),
+                    ->formatStateUsing(fn ($state) => ucwords($state)),
             ])
             ->modifyQueryUsing(
-                fn(Builder $query) =>
-                $query->with('barangMasuk.barangMasukDetails.unitAc')
+                fn (Builder $query) => $query->with('barangMasuk.barangMasukDetails.unitAc')
             )
             ->filters([
                 // Filter Bulan berdasarkan tanggal barang masuk
@@ -247,6 +254,7 @@ class UtangResource extends Resource
                                 $q->whereMonth('tanggal', $data['value']);
                             });
                         }
+
                         return $query;
                     }),
 
@@ -259,6 +267,7 @@ class UtangResource extends Resource
                         for ($i = $currentYear - 5; $i <= $currentYear + 1; $i++) {
                             $years[$i] = $i;
                         }
+
                         return $years;
                     })
                     ->query(function (Builder $query, array $data) {
@@ -267,6 +276,7 @@ class UtangResource extends Resource
                                 $q->whereYear('tanggal', $data['value']);
                             });
                         }
+
                         return $query;
                     }),
 

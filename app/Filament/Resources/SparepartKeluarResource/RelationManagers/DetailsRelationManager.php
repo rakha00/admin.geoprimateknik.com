@@ -5,8 +5,8 @@ namespace App\Filament\Resources\SparepartKeluarResource\RelationManagers;
 use App\Models\Sparepart;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -16,6 +16,7 @@ use Filament\Tables\Columns\TextColumn;
 class DetailsRelationManager extends RelationManager
 {
     protected static string $relationship = 'details';
+
     protected static ?string $recordTitleAttribute = 'nama_sparepart';
 
     public function form(Forms\Form $form): Forms\Form
@@ -28,10 +29,11 @@ class DetailsRelationManager extends RelationManager
                 ->live()
                 ->required()
                 ->afterStateUpdated(function ($state, Set $set) {
-                    if (!$state) {
+                    if (! $state) {
                         $set('nama_sparepart', '');
                         $set('sparepart_id', null);
                         $set('harga_patokan', 0);
+
                         return;
                     }
 
@@ -113,21 +115,21 @@ class DetailsRelationManager extends RelationManager
                 TextColumn::make('jumlah_keluar')->label('Qty')->numeric(),
                 TextColumn::make('harga_modal')
                     ->label('Harga Modal')
-                    ->formatStateUsing(fn($state) => number_format($state ?? 0, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => number_format($state ?? 0, 0, ',', '.')),
 
                 TextColumn::make('harga_jual')
                     ->label('Harga Jual')
-                    ->formatStateUsing(fn($state) => number_format($state ?? 0, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => number_format($state ?? 0, 0, ',', '.')),
 
                 TextColumn::make('total_harga_jual')
                     ->label('Total Jual')
-                    ->getStateUsing(fn($record) => $record->total_harga_jual ?? (($record->harga_jual ?? 0) * ($record->jumlah_keluar ?? 0)))
-                    ->formatStateUsing(fn($state) => number_format($state ?? 0, 0, ',', '.')),
+                    ->getStateUsing(fn ($record) => $record->total_harga_jual ?? (($record->harga_jual ?? 0) * ($record->jumlah_keluar ?? 0)))
+                    ->formatStateUsing(fn ($state) => number_format($state ?? 0, 0, ',', '.')),
 
                 TextColumn::make('keuntungan')
                     ->label('Keuntungan')
-                    ->getStateUsing(fn($record) => ($record->total_harga_jual ?? (($record->harga_jual ?? 0) * ($record->jumlah_keluar ?? 0))) - (($record->harga_modal ?? 0) * ($record->jumlah_keluar ?? 0)))
-                    ->formatStateUsing(fn($state) => number_format($state ?? 0, 0, ',', '.')),
+                    ->getStateUsing(fn ($record) => ($record->total_harga_jual ?? (($record->harga_jual ?? 0) * ($record->jumlah_keluar ?? 0))) - (($record->harga_modal ?? 0) * ($record->jumlah_keluar ?? 0)))
+                    ->formatStateUsing(fn ($state) => number_format($state ?? 0, 0, ',', '.')),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),

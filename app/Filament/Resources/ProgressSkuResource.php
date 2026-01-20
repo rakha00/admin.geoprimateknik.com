@@ -4,30 +4,33 @@ namespace App\Filament\Resources;
 
 use App\Models\UnitAc;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class ProgressSKUResource extends Resource
 {
     protected static ?string $model = UnitAc::class;
 
-
     protected static ?string $navigationIcon = 'heroicon-o-qr-code';
-    protected static ?string $navigationLabel = 'Progres SKU';
-    protected static ?string $navigationGroup = 'Laporan';
-    protected static ?string $pluralModelLabel = 'Progres SKU';
-    protected static ?int $navigationSort = 4;
 
+    protected static ?string $navigationLabel = 'Progres SKU';
+
+    protected static ?string $navigationGroup = 'Laporan';
+
+    protected static ?string $pluralModelLabel = 'Progres SKU';
+
+    protected static ?int $navigationSort = 4;
 
     public static function canCreate(): bool
     {
         return false;
     }
+
     public static function canEdit($record): bool
     {
         return false;
     }
+
     public static function canDelete($record): bool
     {
         return false;
@@ -39,10 +42,9 @@ class ProgressSKUResource extends Resource
     }
 
     // public static function shouldRegisterNavigation(): bool
-// {
-//     return false;
-// }
-
+    // {
+    //     return false;
+    // }
 
     public static function table(Table $table): Table
     {
@@ -55,8 +57,7 @@ class ProgressSKUResource extends Resource
                 TextColumn::make('total_terjual')
                     ->label('Total Terjual')
                     ->getStateUsing(
-                        fn(UnitAc $record) =>
-                        $record->transaksiProdukDetails->sum('jumlah_keluar')
+                        fn (UnitAc $record) => $record->transaksiProdukDetails->sum('jumlah_keluar')
                     )
                     ->sortable(),
             ])
@@ -83,6 +84,7 @@ class ProgressSKUResource extends Resource
                                 $q->whereMonth('tanggal', $data['value']);
                             });
                         }
+
                         return $query;
                     }),
             ])

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Utang extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         'barang_masuk_id',
         'due_date',
@@ -29,7 +29,7 @@ class Utang extends Model
         static::creating(function ($detail) {
             if ($detail->barang_masuk_id) {
                 $barangMasuk = BarangMasuk::with('barangMasukDetails')->find($detail->barang_masuk_id);
-                
+
                 if ($barangMasuk) {
                     $totalHargaModal = $barangMasuk->barangMasukDetails->sum(function ($detail) {
                         $harga = $detail->harga_modal ?? 0;
@@ -40,7 +40,7 @@ class Utang extends Model
 
                     $detail->total_harga_modal = $totalHargaModal;
 
-                }else{
+                } else {
                     $detail->total_harga_modal = 0;
 
                 }

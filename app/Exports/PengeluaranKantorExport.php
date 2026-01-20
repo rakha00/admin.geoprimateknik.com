@@ -3,13 +3,13 @@
 namespace App\Exports;
 
 use App\Models\PengeluaranKantor;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class PengeluaranKantorExport implements FromCollection, WithHeadings, ShouldAutoSize
+class PengeluaranKantorExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
     protected $filters;
 

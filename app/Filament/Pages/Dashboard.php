@@ -31,14 +31,14 @@ class Dashboard extends BaseDashboard
                     '11' => 'November',
                     '12' => 'Desember',
                 ]),
-                Select::make('tahun')
+            Select::make('tahun')
                 ->label('Tahun')
                 ->default(date('Y'))
                 ->options(array_combine(
                     range(2023, date('Y')),
                     range(2023, date('Y')),
                 )),
-            
+
         ]);
     }
 }

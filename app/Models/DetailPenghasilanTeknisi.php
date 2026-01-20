@@ -18,9 +18,9 @@ class DetailPenghasilanTeknisi extends Model
         'tanggal',
         'teknisi_id', // kalau ada relasi foreign key, masukin juga
     ];
+
     public function teknisi()
     {
         return $this->belongsTo(Teknisi::class);
     }
-
 }

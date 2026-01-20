@@ -18,6 +18,7 @@ class DetailPenghasilanHelper extends Model
         'tanggal',
         'helper_id', // kalau ada relasi foreign key, masukin juga
     ];
+
     public function helper()
     {
         return $this->belongsTo(Helper::class);

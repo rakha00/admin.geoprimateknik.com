@@ -4,12 +4,12 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProgresSalesResource\Pages;
 use App\Models\Sales;
+use Carbon\Carbon;
+use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\DatePicker;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -18,9 +18,13 @@ class ProgresSalesResource extends Resource
     protected static ?string $model = Sales::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+
     protected static ?string $navigationLabel = 'Progres Sales';
+
     protected static ?string $navigationGroup = 'Laporan';
+
     protected static ?string $pluralModelLabel = 'Progres Sales';
+
     protected static ?int $navigationSort = 1;
 
     // Static variable untuk menyimpan filter
@@ -58,9 +62,10 @@ class ProgresSalesResource extends Resource
                         }
 
                         $result = $query->first();
+
                         return $result->total ?: 0;
                     })
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state ?: 0, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state ?: 0, 0, ',', '.')),
 
                 TextColumn::make('total_unit')
                     ->label('Total Unit Terjual')
@@ -81,6 +86,7 @@ class ProgresSalesResource extends Resource
                         }
 
                         $result = $query->first();
+
                         return $result->total ?: 0;
                     }),
 
@@ -107,12 +113,13 @@ class ProgresSalesResource extends Resource
 
                         $result = $query->first();
 
-                        if (!$result || $result->total_modal == 0) {
+                        if (! $result || $result->total_modal == 0) {
                             return '0%';
                         }
 
                         $percentage = round(($result->total_keuntungan / $result->total_modal) * 100, 2);
-                        return $percentage . '%';
+
+                        return $percentage.'%';
                     }),
             ])
             ->filters([
@@ -148,10 +155,10 @@ class ProgresSalesResource extends Resource
                         $indicators = [];
 
                         if ($data['from']) {
-                            $indicators['from'] = 'Dari: ' . Carbon::parse($data['from'])->format('d M Y');
+                            $indicators['from'] = 'Dari: '.Carbon::parse($data['from'])->format('d M Y');
                         }
                         if ($data['until']) {
-                            $indicators['until'] = 'Sampai: ' . Carbon::parse($data['until'])->format('d M Y');
+                            $indicators['until'] = 'Sampai: '.Carbon::parse($data['until'])->format('d M Y');
                         }
 
                         return $indicators;

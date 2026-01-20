@@ -4,12 +4,11 @@ namespace App\Exports;
 
 use App\Models\Gudang;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class GudangGajiExport implements FromCollection, WithHeadings, ShouldAutoSize
+class GudangGajiExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
     protected $filters;
 

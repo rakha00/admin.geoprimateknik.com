@@ -19,15 +19,15 @@ class TransaksiJasaExport implements FromCollection, WithHeadings
     {
         $query = TransaksiJasa::query();
 
-        if (!empty($this->filters['bulan'])) {
+        if (! empty($this->filters['bulan'])) {
             $query->whereMonth('tanggal', $this->filters['bulan']);
         }
 
-        if (!empty($this->filters['from'])) {
+        if (! empty($this->filters['from'])) {
             $query->whereDate('tanggal', '>=', $this->filters['from']);
         }
 
-        if (!empty($this->filters['until'])) {
+        if (! empty($this->filters['until'])) {
             $query->whereDate('tanggal', '<=', $this->filters['until']);
         }
 

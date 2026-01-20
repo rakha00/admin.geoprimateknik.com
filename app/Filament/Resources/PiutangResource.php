@@ -3,18 +3,18 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PiutangResource\Pages;
-use App\Models\Piutang;
-use App\Models\Pajak;
 use App\Models\NonPajak;
+use App\Models\Pajak;
+use App\Models\Piutang;
 use Filament\Forms;
+use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 class PiutangResource extends Resource
@@ -22,9 +22,13 @@ class PiutangResource extends Resource
     protected static ?string $model = Piutang::class;
 
     protected static ?string $navigationGroup = 'Keuangan';
+
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
+
     protected static ?string $navigationLabel = 'Piutang';
+
     protected static ?string $pluralModelLabel = 'Piutang';
+
     protected static ?int $navigationSort = 1;
 
     public static function canViewAny(): bool
@@ -45,7 +49,7 @@ class PiutangResource extends Resource
                     ->afterStateUpdated(function (Set $set, Get $get, $state) {
                         if ($state) {
                             $pajak = Pajak::with('details')->find($state);
-                            $totalJual = $pajak->details->sum(fn($d) => $d->total_harga_jual ?? ($d->harga_jual * $d->jumlah_keluar));
+                            $totalJual = $pajak->details->sum(fn ($d) => $d->total_harga_jual ?? ($d->harga_jual * $d->jumlah_keluar));
                             $set('total_harga_modal', $totalJual);
                         }
                     }),
@@ -59,11 +63,10 @@ class PiutangResource extends Resource
                     ->afterStateUpdated(function (Set $set, Get $get, $state) {
                         if ($state) {
                             $nonPajak = NonPajak::with('details')->find($state); // Tambahkan ->with('details')
-                            $totalJual = $nonPajak->details->sum(fn($d) => $d->total_harga_jual ?? ($d->harga_jual * $d->jumlah_keluar));
+                            $totalJual = $nonPajak->details->sum(fn ($d) => $d->total_harga_jual ?? ($d->harga_jual * $d->jumlah_keluar));
                             $set('total_harga_modal', $totalJual);
                         }
                     }),
-
 
                 Forms\Components\DatePicker::make('due_date')
                     ->label('Jatuh Tempo')
@@ -99,14 +102,13 @@ class PiutangResource extends Resource
             ->columns([
                 TextColumn::make('tanggal')
                     ->label('Tanggal')
-                    ->getStateUsing(fn($record) => $record->pajak->tanggal ?? $record->nonPajak->tanggal ?? $record->sparepartKeluar->tanggal ?? $record->transaksiJasa->tanggal_transaksi ?? '-')
+                    ->getStateUsing(fn ($record) => $record->pajak->tanggal ?? $record->nonPajak->tanggal ?? $record->sparepartKeluar->tanggal ?? $record->transaksiJasa->tanggal_transaksi ?? '-')
                     ->date(),
 
                 TextColumn::make('invoice')
                     ->label('Invoice')
                     ->getStateUsing(
-                        fn($record) =>
-                        $record->pajak->no_invoice
+                        fn ($record) => $record->pajak->no_invoice
                         ?? ($record->nonPajak ? $record->nonPajak->no_invoice_non_pajak : null)
                         ?? ($record->sparepartKeluar ? $record->sparepartKeluar->no_invoice : null)
                         ?? ($record->transaksiJasa ? $record->transaksiJasa->no_invoice : '-')
@@ -122,7 +124,7 @@ class PiutangResource extends Resource
 
                 TextColumn::make('sisa_piutang')
                     ->label('Sisa Piutang')
-                    ->getStateUsing(fn($record) => ($record->total_harga_modal ?? 0) - ($record->sudah_dibayar ?? 0))
+                    ->getStateUsing(fn ($record) => ($record->total_harga_modal ?? 0) - ($record->sudah_dibayar ?? 0))
                     ->money('IDR'),
 
                 TextColumn::make('due_date')
@@ -140,8 +142,7 @@ class PiutangResource extends Resource
                 TextColumn::make('keterangan'),
             ])
             ->modifyQueryUsing(
-                fn(Builder $query) =>
-                $query->with(['pajak.details', 'nonPajak.details', 'sparepartKeluar.details', 'transaksiJasa'])
+                fn (Builder $query) => $query->with(['pajak.details', 'nonPajak.details', 'sparepartKeluar.details', 'transaksiJasa'])
             )
             ->filters([
                 // Filter Bulan - DIPERBAIKI
@@ -178,6 +179,7 @@ class PiutangResource extends Resource
                                     });
                             });
                         }
+
                         return $query;
                     }),
                 // OPSIONAL: Filter Tahun juga
@@ -189,6 +191,7 @@ class PiutangResource extends Resource
                         for ($i = $currentYear - 5; $i <= $currentYear + 1; $i++) {
                             $years[$i] = $i;
                         }
+
                         return $years;
                     })
                     ->query(function (Builder $query, array $data) {
@@ -208,6 +211,7 @@ class PiutangResource extends Resource
                                     });
                             });
                         }
+
                         return $query;
                     }),
 
@@ -266,7 +270,6 @@ class PiutangResource extends Resource
                         });
                     }),
 
-
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -275,7 +278,6 @@ class PiutangResource extends Resource
                 Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
-
 
     public static function getRelations(): array
     {

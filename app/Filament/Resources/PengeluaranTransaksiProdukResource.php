@@ -3,26 +3,28 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PengeluaranTransaksiProdukResource\Pages;
-use App\Filament\Resources\PengeluaranTransaksiProdukResource\RelationManagers;
 use App\Models\PengeluaranTransaksiProduk;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\{TextInput, DatePicker};
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class PengeluaranTransaksiProdukResource extends Resource
 {
     protected static ?string $model = PengeluaranTransaksiProduk::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
+
     protected static ?string $navigationGroup = 'Keuangan';
+
     protected static ?string $navigationLabel = 'Pengeluaran Transaksi';
+
     protected static ?string $pluralModelLabel = 'Pengeluaran Transaksi';
+
     protected static ?int $navigationSort = 5;
 
     public static function canViewAny(): bool
@@ -51,7 +53,7 @@ class PengeluaranTransaksiProdukResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('tanggal')->date(),
-                TextColumn::make('pengeluaran')->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                TextColumn::make('pengeluaran')->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
                 TextColumn::make('pembayaran')->sortable(),
 
             ])
@@ -64,10 +66,9 @@ class PengeluaranTransaksiProdukResource extends Resource
                     ])
                     ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data): \Illuminate\Database\Eloquent\Builder {
                         return $query
-                            ->when($data['from'], fn($q, $from) => $q->whereDate('tanggal', '>=', $from))
-                            ->when($data['until'], fn($q, $until) => $q->whereDate('tanggal', '<=', $until));
+                            ->when($data['from'], fn ($q, $from) => $q->whereDate('tanggal', '>=', $from))
+                            ->when($data['until'], fn ($q, $until) => $q->whereDate('tanggal', '<=', $until));
                     }),
-
 
             ])
             ->actions([

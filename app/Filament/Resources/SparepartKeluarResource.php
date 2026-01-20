@@ -6,29 +6,31 @@ use App\Filament\Resources\SparepartKeluarResource\Pages;
 use App\Filament\Resources\SparepartKeluarResource\RelationManagers;
 use App\Models\SparepartKeluar;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
-use Illuminate\Support\Carbon;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Support\Carbon;
 
 class SparepartKeluarResource extends Resource
 {
     protected static ?string $model = SparepartKeluar::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-up-on-square-stack';
+
     protected static ?string $navigationGroup = 'Transaksi';
+
     protected static ?string $navigationLabel = 'Sparepart Keluar';
+
     protected static ?string $pluralModelLabel = 'Sparepart Keluar';
+
     protected static ?int $navigationSort = 5;
+
     protected static ?string $recordTitleAttribute = 'no_invoice';
 
     public static function form(Form $form): Form
@@ -39,8 +41,9 @@ class SparepartKeluarResource extends Resource
                 ->required()
                 ->reactive()
                 ->afterStateUpdated(function ($state, $get, $set) {
-                    if (!$state)
+                    if (! $state) {
                         return;
+                    }
 
                     $codes = self::generateCode($state);
                     $set('no_invoice', $codes['invoice']);
@@ -123,8 +126,9 @@ class SparepartKeluarResource extends Resource
             9 => 'IX',
             10 => 'X',
             11 => 'XI',
-            12 => 'XII'
+            12 => 'XII',
         ];
+
         return $map[$month] ?? '';
     }
 
@@ -146,6 +150,7 @@ class SparepartKeluarResource extends Resource
                 if (preg_match("/^GTP-SPKINV\/{$yy}\/[IVX]+\/(\d+)$/", $item->no_invoice, $matches)) {
                     return (int) $matches[1];
                 }
+
                 return 0;
             })
             ->max();
@@ -172,29 +177,26 @@ class SparepartKeluarResource extends Resource
                 TextColumn::make('total_harga_jual')
                     ->label('Total Harga Jual')
                     ->getStateUsing(
-                        fn(SparepartKeluar $record): int =>
-                        $record->details->sum(function ($detail) {
+                        fn (SparepartKeluar $record): int => $record->details->sum(function ($detail) {
                             return ($detail->harga_jual ?? 0) * ($detail->jumlah_keluar ?? 0);
                         })
                     )
                     ->formatStateUsing(
-                        fn(int $state): string =>
-                        number_format($state, 0, ',', '.')
+                        fn (int $state): string => number_format($state, 0, ',', '.')
                     ),
 
                 TextColumn::make('total_keuntungan')
                     ->label('Total Keuntungan')
                     ->getStateUsing(
-                        fn(SparepartKeluar $record): int =>
-                        $record->details->sum(function ($detail) {
+                        fn (SparepartKeluar $record): int => $record->details->sum(function ($detail) {
                             $totalJual = ($detail->harga_jual ?? 0) * ($detail->jumlah_keluar ?? 0);
                             $totalModal = ($detail->harga_modal ?? 0) * ($detail->jumlah_keluar ?? 0);
+
                             return $totalJual - $totalModal;
                         })
                     )
                     ->formatStateUsing(
-                        fn(int $state): string =>
-                        number_format($state, 0, ',', '.')
+                        fn (int $state): string => number_format($state, 0, ',', '.')
                     ),
             ])
             ->filters([
@@ -206,8 +208,8 @@ class SparepartKeluarResource extends Resource
                     ])
                     ->query(function ($query, array $data) {
                         return $query
-                            ->when($data['from'], fn($q, $from) => $q->whereDate('tanggal', '>=', $from))
-                            ->when($data['until'], fn($q, $until) => $q->whereDate('tanggal', '<=', $until));
+                            ->when($data['from'], fn ($q, $from) => $q->whereDate('tanggal', '>=', $from))
+                            ->when($data['until'], fn ($q, $until) => $q->whereDate('tanggal', '<=', $until));
                     }),
             ])
             ->actions([

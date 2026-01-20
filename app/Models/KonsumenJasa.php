@@ -16,7 +16,7 @@ class KonsumenJasa extends Model
         'remarks',
     ];
 
-        public function transaksiJasas()
+    public function transaksiJasas()
     {
         return $this->hasMany(TransaksiJasa::class);
     }

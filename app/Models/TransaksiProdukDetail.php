@@ -16,7 +16,6 @@ class TransaksiProdukDetail extends Model
         // jangan masukkan total_* di $fillable
     ];
 
-
     public function transaksiProduk()
     {
         return $this->belongsTo(TransaksiProduk::class);
@@ -27,14 +26,13 @@ class TransaksiProdukDetail extends Model
     {
         return $this->belongsTo(UnitAc::class, 'sku', 'sku');
     }
-        
 
     protected static function booted()
     {
         static::creating(function ($detail) {
-            $detail->total_modal      = $detail->harga_modal  * $detail->jumlah_keluar;
-            $detail->total_harga_jual = $detail->harga_jual  * $detail->jumlah_keluar;
-            $detail->keuntungan       = $detail->total_harga_jual - $detail->total_modal;
+            $detail->total_modal = $detail->harga_modal * $detail->jumlah_keluar;
+            $detail->total_harga_jual = $detail->harga_jual * $detail->jumlah_keluar;
+            $detail->keuntungan = $detail->total_harga_jual - $detail->total_modal;
         });
     }
 }

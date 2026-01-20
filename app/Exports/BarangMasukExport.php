@@ -3,13 +3,13 @@
 namespace App\Exports;
 
 use App\Models\BarangMasuk;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class BarangMasukExport implements FromCollection, WithHeadings, ShouldAutoSize
+class BarangMasukExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
     protected $filters;
 

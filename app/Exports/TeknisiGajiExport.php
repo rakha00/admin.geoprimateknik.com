@@ -5,10 +5,10 @@ namespace App\Exports;
 use App\Models\Teknisi;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class TeknisiGajiExport implements FromCollection, WithHeadings, ShouldAutoSize
+class TeknisiGajiExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
     protected $filters;
 

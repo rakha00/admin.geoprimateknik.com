@@ -3,12 +3,12 @@
 namespace App\Filament\Resources\SalesResource\RelationManagers;
 
 use Filament\Forms;
-use Filament\Forms\Components\{TextInput, DatePicker};
-use Filament\Tables;
-use Filament\Tables\Columns\{TextColumn, MoneyColumn};
-use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Textarea;
-
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 
 class PenghasilanDetailRelationManager extends RelationManager
 {
@@ -31,10 +31,10 @@ class PenghasilanDetailRelationManager extends RelationManager
         return $table
             ->columns([
                 TextColumn::make('tanggal')->date(),
-                TextColumn::make('kasbon')->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
-                TextColumn::make('lembur')->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
-                TextColumn::make('bonus_retail')->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
-                TextColumn::make('bonus_projek')->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                TextColumn::make('kasbon')->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
+                TextColumn::make('lembur')->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
+                TextColumn::make('bonus_retail')->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
+                TextColumn::make('bonus_projek')->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
                 TextColumn::make('keterangan'),
             ])
             ->headerActions([

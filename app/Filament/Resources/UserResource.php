@@ -3,15 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
@@ -19,9 +16,13 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-user-circle';
+
     protected static ?string $navigationLabel = 'Pengguna';
+
     protected static ?string $navigationGroup = 'Master Data';
+
     protected static ?string $pluralModelLabel = 'Pengguna';
+
     protected static ?int $navigationSort = 4;
 
     public static function canViewAny(): bool
@@ -45,9 +46,9 @@ class UserResource extends Resource
                 Forms\Components\TextInput::make('password')
                     ->label('Password')
                     ->password()
-                    ->required(fn($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord)
-                    ->dehydrateStateUsing(fn($state) => filled($state) ? Hash::make($state) : null)
-                    ->dehydrated(fn($state) => filled($state)),
+                    ->required(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord)
+                    ->dehydrateStateUsing(fn ($state) => filled($state) ? Hash::make($state) : null)
+                    ->dehydrated(fn ($state) => filled($state)),
 
                 Forms\Components\Select::make('level')
                     ->label('Level')
@@ -68,12 +69,12 @@ class UserResource extends Resource
                 Tables\Columns\BadgeColumn::make('level')
                     ->label('Level')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         '1' => 'primary',
                         '2' => 'success',
                         default => 'secondary',
                     })
-                    ->formatStateUsing(fn(string $state) => match ($state) {
+                    ->formatStateUsing(fn (string $state) => match ($state) {
                         '1' => 'Admin',
                         '2' => 'Sales',
                         default => 'Unknown',

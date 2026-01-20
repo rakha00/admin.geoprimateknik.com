@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::table('transaksi_produk_details', function (Blueprint $table) {
             $table->integer('jumlah_keluar')
-          ->default(0)
-          ->after('unit_ac_id');
+                ->default(0)
+                ->after('unit_ac_id');
         });
     }
 

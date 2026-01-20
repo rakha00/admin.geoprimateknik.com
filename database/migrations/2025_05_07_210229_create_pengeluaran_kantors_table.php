@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pengeluaran_kantors', function (Blueprint $table) {
             $table->id();
             $table->date('tanggal');
-            $table->decimal('pengeluaran',15,2);
+            $table->decimal('pengeluaran', 15, 2);
             $table->text('remarks')->nullable();
             $table->timestamps();
         });

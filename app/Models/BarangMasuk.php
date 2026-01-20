@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Model;
 
 class BarangMasuk extends Model
@@ -9,6 +11,7 @@ class BarangMasuk extends Model
         'tanggal',
         'nomor_barang_masuk',
     ];
+
     public function barangMasukDetails()
     {
         return $this->hasMany(BarangMasukDetail::class);

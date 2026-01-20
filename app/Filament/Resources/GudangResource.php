@@ -5,24 +5,28 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\GudangResource\Pages;
 use App\Filament\Resources\GudangResource\RelationManagers;
 use App\Models\Gudang;
-use App\Models\DetailPenghasilanGudang;
 use Filament\Forms;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Forms\Components\{TextInput, Textarea};
-use Filament\Tables\Columns\TextColumn;
 
 class GudangResource extends Resource
 {
     protected static ?string $model = Gudang::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
+
     protected static ?string $navigationLabel = 'Gudang';
+
     protected static ?string $navigationGroup = 'Inventori';
+
     protected static ?string $pluralModelLabel = 'Gudang';
+
     protected static ?int $navigationSort = 4;
 
     public static function canViewAny(): bool
@@ -66,46 +70,42 @@ class GudangResource extends Resource
                 TextColumn::make('no_hp'),
                 TextColumn::make('status')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'aktif' => 'success',
                         'tidak aktif' => 'danger',
                     }),
 
                 TextColumn::make('gaji_pokok')
                     ->label('Gaji Pokok')
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 TextColumn::make('lembur')
                     ->label('Lembur')
                     ->state(
-                        fn($record, $livewire) =>
-                        $record->sumDetail('lembur', $livewire->tableFilters['bulan']['value'] ?? null, null)
+                        fn ($record, $livewire) => $record->sumDetail('lembur', $livewire->tableFilters['bulan']['value'] ?? null, null)
                     )
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 TextColumn::make('bonus')
                     ->label('Bonus')
                     ->state(
-                        fn($record, $livewire) =>
-                        $record->sumDetail('bonus', $livewire->tableFilters['bulan']['value'] ?? null, null)
+                        fn ($record, $livewire) => $record->sumDetail('bonus', $livewire->tableFilters['bulan']['value'] ?? null, null)
                     )
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 TextColumn::make('kasbon')
                     ->label('Kasbon')
                     ->state(
-                        fn($record, $livewire) =>
-                        $record->sumDetail('kasbon', $livewire->tableFilters['bulan']['value'] ?? null, null)
+                        fn ($record, $livewire) => $record->sumDetail('kasbon', $livewire->tableFilters['bulan']['value'] ?? null, null)
                     )
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 TextColumn::make('gaji_diterima')
                     ->label('Gaji Diterima')
                     ->state(
-                        fn($record, $livewire) =>
-                        $record->hitungGajiDiterima($livewire->tableFilters['bulan']['value'] ?? null, null)
+                        fn ($record, $livewire) => $record->hitungGajiDiterima($livewire->tableFilters['bulan']['value'] ?? null, null)
                     )
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 TextColumn::make('terakhir_aktif')->date(),
             ])

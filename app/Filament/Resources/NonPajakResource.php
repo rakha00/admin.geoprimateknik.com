@@ -2,33 +2,35 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\NonPajakResource\Pages\CreateNonPajak;
 use App\Filament\Resources\NonPajakResource\Pages\EditNonPajak;
 use App\Filament\Resources\NonPajakResource\Pages\ListNonPajaks;
-use App\Filament\Resources\NonPajakResource\Pages\CreateNonPajak;
 use App\Filament\Resources\NonPajakResource\RelationManagers\NonPajakDetailRelationManager;
 use App\Models\NonPajak;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
-use Illuminate\Support\Carbon;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Support\Carbon;
 
 class NonPajakResource extends Resource
 {
     protected static ?string $model = NonPajak::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
+
     protected static ?string $navigationGroup = 'Transaksi';
+
     protected static ?string $navigationLabel = 'Transaksi Non-Pajak';
+
     protected static ?string $pluralModelLabel = 'Transaksi Non-Pajak';
+
     protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'no_invoice_non_pajak';
@@ -37,6 +39,7 @@ class NonPajakResource extends Resource
     {
         return 'Transaksi Produk Non Pajak'; // judul di list page
     }
+
     public static function form(Form $form): Form
     {
         return $form->schema([
@@ -46,14 +49,14 @@ class NonPajakResource extends Resource
                 ->required()
                 ->reactive()
                 ->afterStateUpdated(function ($state, $get, $set) {
-                    if (!$state)
+                    if (! $state) {
                         return;
+                    }
 
                     $codes = self::generateCode($state);
                     $set('no_invoice_non_pajak', $codes['invoice']);
                     $set('no_surat_jalan', $codes['surat_jalan']);
                 }),
-
 
             TextInput::make('no_invoice_non_pajak')
                 ->label('No Invoice')
@@ -106,7 +109,6 @@ class NonPajakResource extends Resource
         return $data;
     }
 
-
     public static function mutateFormDataBeforeSave(array $data, NonPajak $record): array
     {
         // Only regenerate if the year of the date changes, or if it's a new record (which is handled by create)
@@ -138,8 +140,9 @@ class NonPajakResource extends Resource
             9 => 'IX',
             10 => 'X',
             11 => 'XI',
-            12 => 'XII'
+            12 => 'XII',
         ];
+
         return $map[$month] ?? '';
     }
 
@@ -161,6 +164,7 @@ class NonPajakResource extends Resource
                 if (preg_match("/^GTP-NONINV\/{$yy}\/[IVX]+\/(\d+)$/", $item->no_invoice_non_pajak, $matches)) {
                     return (int) $matches[1];
                 }
+
                 return 0;
             })
             ->max();
@@ -173,7 +177,6 @@ class NonPajakResource extends Resource
             'surat_jalan' => "GTP-NONSJ/{$yy}/{$romanMonth}/{$sequence}",
         ];
     }
-
 
     public static function table(Table $table): Table
     {
@@ -188,29 +191,26 @@ class NonPajakResource extends Resource
                 TextColumn::make('total_harga_jual')
                     ->label('Total Harga Jual')
                     ->getStateUsing(
-                        fn(NonPajak $record): int =>
-                        $record->details->sum(function ($detail) {
+                        fn (NonPajak $record): int => $record->details->sum(function ($detail) {
                             return ($detail->harga_jual ?? 0) * ($detail->jumlah_keluar ?? 0);
                         })
                     )
                     ->formatStateUsing(
-                        fn(int $state): string =>
-                        number_format($state, 0, ',', '.')
+                        fn (int $state): string => number_format($state, 0, ',', '.')
                     ),
 
                 TextColumn::make('total_keuntungan')
                     ->label('Total Keuntungan')
                     ->getStateUsing(
-                        fn(NonPajak $record): int =>
-                        $record->details->sum(function ($detail) {
+                        fn (NonPajak $record): int => $record->details->sum(function ($detail) {
                             $totalJual = ($detail->harga_jual ?? 0) * ($detail->jumlah_keluar ?? 0);
                             $totalModal = ($detail->harga_modal ?? 0) * ($detail->jumlah_keluar ?? 0);
+
                             return $totalJual - $totalModal;
                         })
                     )
                     ->formatStateUsing(
-                        fn(int $state): string =>
-                        number_format($state, 0, ',', '.')
+                        fn (int $state): string => number_format($state, 0, ',', '.')
                     ),
             ])
             ->actions([
@@ -230,14 +230,14 @@ class NonPajakResource extends Resource
                             ])
                             ->required(),
                     ])
-                    ->action(fn(NonPajak $record, array $data) => redirect()->to(
+                    ->action(fn (NonPajak $record, array $data) => redirect()->to(
                         route(match ($data['type']) {
                             'surat_jalan_sjt' => 'transaksi-produk.surat-jalan.sjt',
                             'surat_jalan_apjt' => 'transaksi-produk.surat-jalan.apjt',
                             'invoice_sjt' => 'transaksi-produk.invoice.sjt',
                             'invoice_apjt' => 'transaksi-produk.invoice.apjt',
                         }, $record)
-                    ))
+                    )),
 
             ])
             ->filters([
@@ -249,8 +249,8 @@ class NonPajakResource extends Resource
                     ])
                     ->query(function ($query, array $data) {
                         return $query
-                            ->when($data['from'], fn($q, $from) => $q->whereDate('tanggal', '>=', $from))
-                            ->when($data['until'], fn($q, $until) => $q->whereDate('tanggal', '<=', $until));
+                            ->when($data['from'], fn ($q, $from) => $q->whereDate('tanggal', '>=', $from))
+                            ->when($data['until'], fn ($q, $until) => $q->whereDate('tanggal', '<=', $until));
                     }),
             ]);
     }

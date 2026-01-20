@@ -3,27 +3,28 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SewaACResource\Pages;
-use App\Filament\Resources\SewaACResource\RelationManagers;
 use App\Models\SewaAC;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\{TextInput, DatePicker};
 use Filament\Tables\Columns\TextColumn;
-use Illuminate\Support\Facades\Request;
+use Filament\Tables\Table;
 
 class SewaACResource extends Resource
 {
     protected static ?string $model = SewaAC::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clock';
+
     protected static ?string $navigationLabel = 'Sewa AC';
+
     protected static ?string $navigationGroup = 'Transaksi';
+
     protected static ?string $pluralModelLabel = 'Sewa AC';
+
     protected static ?int $navigationSort = 4;
 
     public static function canViewAny(): bool
@@ -54,8 +55,8 @@ class SewaACResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('tanggal')->date()->sortable(),
-                TextColumn::make('pemasukan')->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
-                TextColumn::make('pengeluaran')->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                TextColumn::make('pemasukan')->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
+                TextColumn::make('pengeluaran')->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
                 TextColumn::make('pembayaran')->sortable(),
             ])
             ->filters([
@@ -67,10 +68,9 @@ class SewaACResource extends Resource
                     ])
                     ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data): \Illuminate\Database\Eloquent\Builder {
                         return $query
-                            ->when($data['from'], fn($q, $from) => $q->whereDate('tanggal', '>=', $from))
-                            ->when($data['until'], fn($q, $until) => $q->whereDate('tanggal', '<=', $until));
+                            ->when($data['from'], fn ($q, $from) => $q->whereDate('tanggal', '>=', $from))
+                            ->when($data['until'], fn ($q, $until) => $q->whereDate('tanggal', '<=', $until));
                     }),
-
 
             ])
             ->actions([
@@ -87,7 +87,6 @@ class SewaACResource extends Resource
                         $bulanFilter = $allFilters['bulan'] ?? null;
                         $rentangFilter = $allFilters['rentang_tanggal'] ?? null;
 
-
                         $processedFilters = [
                             'bulan' => is_array($bulanFilter) ? ($bulanFilter['value'] ?? null) : $bulanFilter,
                             'from' => is_array($rentangFilter) ? ($rentangFilter['from'] ?? null) : null,
@@ -98,7 +97,7 @@ class SewaACResource extends Resource
                             new \App\Exports\SewaACExport($processedFilters),
                             'sewa_ac_filtered.xlsx'
                         );
-                    })
+                    }),
             ])
 
             ->bulkActions([

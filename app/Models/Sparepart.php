@@ -19,6 +19,7 @@ class Sparepart extends Model
         'stok_keluar',
         'stok_akhir',
     ];
+
     public function recalculateStock()
     {
         $stokMasuk = $this->stok_masuk; // Assuming this is managed elsewhere or static for now

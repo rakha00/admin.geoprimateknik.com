@@ -13,8 +13,8 @@ class CreateTransaksiProdukDetailsTable extends Migration
 
             // relasi ke header transaksi_produk
             $table->foreignId('transaksi_produk_id')
-                  ->constrained('transaksi_produks')
-                  ->onDelete('cascade');
+                ->constrained('transaksi_produks')
+                ->onDelete('cascade');
 
             // data detail
             $table->string('sku')->nullable();

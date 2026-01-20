@@ -23,9 +23,9 @@ class Helper extends Model
             ->filter(function ($detail) use ($bulan, $from, $until) {
                 $tanggal = $detail->tanggal ? Carbon::parse($detail->tanggal) : null;
 
-                return (!$bulan || ($tanggal && $tanggal->month == $bulan))
-                    && (!$from || ($tanggal && $tanggal->gte($from)))
-                    && (!$until || ($tanggal && $tanggal->lte($until)));
+                return (! $bulan || ($tanggal && $tanggal->month == $bulan))
+                    && (! $from || ($tanggal && $tanggal->gte($from)))
+                    && (! $until || ($tanggal && $tanggal->lte($until)));
             })
             ->sum($field);
     }
@@ -38,5 +38,4 @@ class Helper extends Model
 
         return $this->gaji_pokok + $lembur + $bonus - $kasbon;
     }
-
 }

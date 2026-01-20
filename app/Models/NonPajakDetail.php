@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class NonPajakDetail extends Model
 {
@@ -49,8 +49,9 @@ class NonPajakDetail extends Model
     protected function syncPiutang()
     {
         $nonPajak = $this->nonPajak;
-        if (!$nonPajak)
+        if (! $nonPajak) {
             return;
+        }
 
         $totalHargaJual = $nonPajak->details()->sum('total_harga_jual');
 

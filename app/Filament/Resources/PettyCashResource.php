@@ -3,31 +3,31 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PettyCashResource\Pages;
-use App\Filament\Resources\PettyCashResource\RelationManagers;
 use App\Models\PettyCash;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\DatePicker;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class PettyCashResource extends Resource
 {
     protected static ?string $model = PettyCash::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+
     protected static ?string $navigationLabel = 'Petty Cash';
+
     protected static ?string $navigationGroup = 'Keuangan';
+
     protected static ?string $pluralModelLabel = 'Petty Cash';
+
     protected static ?int $navigationSort = 3;
 
     public static function canViewAny(): bool
@@ -75,7 +75,6 @@ class PettyCashResource extends Resource
             ]);
     }
 
-
     public static function table(Table $table): Table
     {
         return $table
@@ -83,11 +82,11 @@ class PettyCashResource extends Resource
                 TextColumn::make('tanggal')->date()->sortable(),
                 TextColumn::make('kategori')->badge()
                     ->colors([
-                        'success' => fn($state) => $state === 'Pemasukan',
-                        'danger' => fn($state) => $state === 'Pengeluaran',
+                        'success' => fn ($state) => $state === 'Pemasukan',
+                        'danger' => fn ($state) => $state === 'Pengeluaran',
                     ]),
                 TextColumn::make('nominal')
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
                 TextColumn::make('metode_pembayaran'),
                 TextColumn::make('keterangan')->limit(30),
                 ImageColumn::make('bukti_pembayaran')->height(100),
@@ -104,7 +103,6 @@ class PettyCashResource extends Resource
                 ]),
             ]);
     }
-
 
     public static function getRelations(): array
     {

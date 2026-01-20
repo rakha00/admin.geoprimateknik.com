@@ -12,6 +12,7 @@ use Filament\Tables\Table;
 class BarangMasukDetailsRelationManager extends RelationManager
 {
     protected static string $relationship = 'details';
+
     protected static ?string $recordTitleAttribute = 'sku';
 
     public function form(Form $form): Form
@@ -26,15 +27,15 @@ class BarangMasukDetailsRelationManager extends RelationManager
                     ])
                     ->default('unit_ac')
                     ->reactive()
-                    ->afterStateUpdated(fn($state, callable $set) => $set('unit_ac_id', null) && $set('sparepart_id', null)),
+                    ->afterStateUpdated(fn ($state, callable $set) => $set('unit_ac_id', null) && $set('sparepart_id', null)),
 
                 Forms\Components\Select::make('unit_ac_id')
                     ->label('Unit AC SKU')
                     ->options(UnitAc::pluck('sku', 'id'))
                     ->searchable()
                     ->reactive()
-                    ->required(fn(Forms\Get $get) => $get('type') === 'unit_ac')
-                    ->visible(fn(Forms\Get $get) => $get('type') === 'unit_ac')
+                    ->required(fn (Forms\Get $get) => $get('type') === 'unit_ac')
+                    ->visible(fn (Forms\Get $get) => $get('type') === 'unit_ac')
                     ->afterStateUpdated(function ($state, callable $set) {
                         $unit = UnitAc::find($state);
                         if ($unit) {
@@ -50,8 +51,8 @@ class BarangMasukDetailsRelationManager extends RelationManager
                     ->options(\App\Models\Sparepart::pluck('sku', 'id'))
                     ->searchable()
                     ->reactive()
-                    ->required(fn(Forms\Get $get) => $get('type') === 'sparepart')
-                    ->visible(fn(Forms\Get $get) => $get('type') === 'sparepart')
+                    ->required(fn (Forms\Get $get) => $get('type') === 'sparepart')
+                    ->visible(fn (Forms\Get $get) => $get('type') === 'sparepart')
                     ->afterStateUpdated(function ($state, callable $set) {
                         $sparepart = \App\Models\Sparepart::find($state);
                         if ($sparepart) {
@@ -94,7 +95,6 @@ class BarangMasukDetailsRelationManager extends RelationManager
             ]);
     }
 
-
     public function table(Table $table): Table
     {
         return $table
@@ -118,7 +118,7 @@ class BarangMasukDetailsRelationManager extends RelationManager
 
                 Tables\Columns\TextColumn::make('total_harga_modal')
                     ->label('Total Harga Modal')
-                    ->getStateUsing(fn($record) => $record->harga_modal * $record->jumlah_barang_masuk)
+                    ->getStateUsing(fn ($record) => $record->harga_modal * $record->jumlah_barang_masuk)
                     ->prefix('Rp ')
                     ->sortable(),
             ])
@@ -133,5 +133,4 @@ class BarangMasukDetailsRelationManager extends RelationManager
                 Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
-
 }

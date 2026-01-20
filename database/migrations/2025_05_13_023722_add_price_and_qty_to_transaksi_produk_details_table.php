@@ -15,20 +15,20 @@ return new class extends Migration
             // Tambahkan kolom hanya jika belum ada, untuk menghindari error duplicate
             if (! Schema::hasColumn('transaksi_produk_details', 'harga_modal')) {
                 $table->integer('harga_modal')
-                      ->default(0)
-                      ->after('nama_unit');
+                    ->default(0)
+                    ->after('nama_unit');
             }
 
             if (! Schema::hasColumn('transaksi_produk_details', 'harga_jual')) {
                 $table->integer('harga_jual')
-                      ->default(0)
-                      ->after('harga_modal');
+                    ->default(0)
+                    ->after('harga_modal');
             }
 
             if (! Schema::hasColumn('transaksi_produk_details', 'jumlah_keluar')) {
                 $table->integer('jumlah_keluar')
-                      ->default(0)
-                      ->after('harga_jual');
+                    ->default(0)
+                    ->after('harga_jual');
             }
         });
     }

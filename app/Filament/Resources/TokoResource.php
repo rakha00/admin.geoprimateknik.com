@@ -7,19 +7,23 @@ use App\Models\Toko;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;               // <-- Inilah yang pakai
-use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Actions\DeleteBulkAction;               // <-- Inilah yang pakai
 use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class TokoResource extends Resource
 {
     protected static ?string $model = Toko::class;
 
     protected static ?string $navigationGroup = 'Master Data';
+
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
+
     protected static ?string $navigationLabel = 'Toko';
+
     protected static ?string $pluralModelLabel = 'Toko';
+
     protected static ?int $navigationSort = 2;
 
     public static function canViewAny(): bool

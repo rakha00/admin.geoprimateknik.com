@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Pajak extends Model
 {
@@ -34,4 +34,3 @@ class Pajak extends Model
         return $this->belongsTo(Toko::class);
     }
 }
-

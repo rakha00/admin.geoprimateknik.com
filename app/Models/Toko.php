@@ -22,8 +22,7 @@ class Toko extends Model
     }
 
     public function transaksiProdukFix()
-{
-    return $this->hasMany(TransaksiProduk::class, 'toko_id');
-}
-
+    {
+        return $this->hasMany(TransaksiProduk::class, 'toko_id');
+    }
 }

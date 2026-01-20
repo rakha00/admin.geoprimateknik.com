@@ -18,6 +18,7 @@ class DetailPenghasilanGudang extends Model
         'remarks',
         'tanggal',
     ];
+
     public function gudang()
     {
         return $this->belongsTo(Gudang::class, 'gudang_id');

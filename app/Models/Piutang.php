@@ -32,15 +32,15 @@ class Piutang extends Model
         static::creating(function ($piutang) {
             if ($piutang->non_pajak_id) {
                 $nonpajak = NonPajak::with('details')->find($piutang->non_pajak_id);
-                $piutang->total_harga_modal = $nonpajak->details->sum(fn($d) => $d->total_harga_jual ?? ($d->harga_jual * $d->jumlah_keluar));
+                $piutang->total_harga_modal = $nonpajak->details->sum(fn ($d) => $d->total_harga_jual ?? ($d->harga_jual * $d->jumlah_keluar));
                 $piutang->due_date = $nonpajak->tanggal ?? null;
             } elseif ($piutang->pajak_id) {
                 $pajak = Pajak::with('details')->find($piutang->pajak_id);
-                $piutang->total_harga_modal = $pajak->details->sum(fn($d) => $d->total_harga_jual ?? ($d->harga_jual * $d->jumlah_keluar));
+                $piutang->total_harga_modal = $pajak->details->sum(fn ($d) => $d->total_harga_jual ?? ($d->harga_jual * $d->jumlah_keluar));
                 $piutang->due_date = $pajak->tanggal ?? null;
             } elseif ($piutang->sparepart_keluar_id) {
                 $sparepartKeluar = SparepartKeluar::with('details')->find($piutang->sparepart_keluar_id);
-                $piutang->total_harga_modal = $sparepartKeluar->details->sum(fn($d) => $d->total_harga_jual ?? ($d->harga_jual * $d->jumlah_keluar));
+                $piutang->total_harga_modal = $sparepartKeluar->details->sum(fn ($d) => $d->total_harga_jual ?? ($d->harga_jual * $d->jumlah_keluar));
                 $piutang->due_date = $sparepartKeluar->tanggal ?? null;
             } elseif ($piutang->transaksi_jasa_id) {
                 $transaksiJasa = TransaksiJasa::find($piutang->transaksi_jasa_id);
@@ -57,7 +57,6 @@ class Piutang extends Model
     {
         return $this->belongsTo(SparepartKeluar::class);
     }
-
 
     /**
      * Relasi ke Pajak

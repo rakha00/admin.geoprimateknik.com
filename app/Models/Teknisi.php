@@ -16,6 +16,7 @@ class Teknisi extends Model
     {
         return $this->hasMany(DetailPenghasilanTeknisi::class);
     }
+
     public function getTotalGajiAttribute()
     {
         return ($this->gaji_pokok ?? 0) + ($this->lembur ?? 0) + ($this->bonus ?? 0);
@@ -32,8 +33,8 @@ class Teknisi extends Model
             ->filter(function ($detail) use ($from, $until) {
                 $tanggal = $detail->tanggal ? Carbon::parse($detail->tanggal) : null;
 
-                return (!$from || ($tanggal && $tanggal->gte(Carbon::parse($from))))
-                    && (!$until || ($tanggal && $tanggal->lte(Carbon::parse($until))));
+                return (! $from || ($tanggal && $tanggal->gte(Carbon::parse($from))))
+                    && (! $until || ($tanggal && $tanggal->lte(Carbon::parse($until))));
             })
             ->sum($field);
     }
@@ -46,5 +47,4 @@ class Teknisi extends Model
 
         return $this->gaji_pokok + $lembur + $bonus - $kasbon;
     }
-
 }

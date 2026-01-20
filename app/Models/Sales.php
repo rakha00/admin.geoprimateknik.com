@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-
 class Sales extends Model
 {
     use HasFactory;
@@ -47,11 +46,10 @@ class Sales extends Model
             ->filter(function ($detail) use ($bulan, $from, $until) {
                 $tanggal = $detail->tanggal ? \Illuminate\Support\Carbon::parse($detail->tanggal) : null;
 
-                return (!$bulan || ($tanggal && $tanggal->month == $bulan))
-                    && (!$from || ($tanggal && $tanggal->greaterThanOrEqualTo($from)))
-                    && (!$until || ($tanggal && $tanggal->lessThanOrEqualTo($until)));
+                return (! $bulan || ($tanggal && $tanggal->month == $bulan))
+                    && (! $from || ($tanggal && $tanggal->greaterThanOrEqualTo($from)))
+                    && (! $until || ($tanggal && $tanggal->lessThanOrEqualTo($until)));
             })
             ->sum($field);
     }
-
 }

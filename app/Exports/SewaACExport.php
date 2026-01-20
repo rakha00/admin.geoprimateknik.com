@@ -3,13 +3,13 @@
 namespace App\Exports;
 
 use App\Models\SewaAC;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class SewaACExport implements FromCollection, WithHeadings, ShouldAutoSize
+class SewaACExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
     protected $filters;
 
@@ -27,20 +27,19 @@ class SewaACExport implements FromCollection, WithHeadings, ShouldAutoSize
 
         if ($this->filters['bulan'] ?? false) {
             $query->whereMonth('tanggal', $this->filters['bulan']);
-    
+
         }
 
         if ($this->filters['from'] ?? false) {
             $query->whereDate('tanggal', '>=', $this->filters['from']);
-    
+
         }
 
         if ($this->filters['until'] ?? false) {
             $query->whereDate('tanggal', '<=', $this->filters['until']);
-           
+
         }
 
-        
         $results = $query->get();
 
         return $results->map(function ($item) {

@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class PajakDetail extends Model
 {
@@ -49,8 +49,9 @@ class PajakDetail extends Model
     protected function syncPiutang()
     {
         $pajak = $this->pajak;
-        if (!$pajak)
+        if (! $pajak) {
             return;
+        }
 
         $totalHargaJual = $pajak->details()->sum('total_harga_jual');
 
@@ -64,5 +65,4 @@ class PajakDetail extends Model
             ]
         );
     }
-
 }

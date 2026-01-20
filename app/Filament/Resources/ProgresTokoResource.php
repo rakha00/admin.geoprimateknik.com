@@ -4,22 +4,23 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProgresTokoResource\Pages;
 use App\Models\Toko;
-use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Support\Carbon;
+use Filament\Tables\Table;
 
 class ProgresTokoResource extends Resource
 {
     protected static ?string $model = Toko::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
+
     protected static ?string $navigationLabel = 'Progres Toko';
+
     protected static ?string $navigationGroup = 'Laporan';
+
     protected static ?string $pluralModelLabel = 'Progres Toko';
+
     protected static ?int $navigationSort = 2;
 
     // public static function shouldRegisterNavigation(): bool
@@ -48,13 +49,13 @@ class ProgresTokoResource extends Resource
                         $year = $livewire->tableFilters['tahun']['value'] ?? null;
 
                         $transactions = $record->transaksiProdukFix()
-                            ->when($month, fn($q) => $q->whereMonth('created_at', $month))
-                            ->when($year, fn($q) => $q->whereYear('created_at', $year))
+                            ->when($month, fn ($q) => $q->whereMonth('created_at', $month))
+                            ->when($year, fn ($q) => $q->whereYear('created_at', $year))
                             ->with('details')
                             ->get();
 
                         return $transactions->flatMap->details
-                            ->sum(fn($detail) => ($detail->harga_jual ?? 0) * ($detail->jumlah_keluar ?? 0));
+                            ->sum(fn ($detail) => ($detail->harga_jual ?? 0) * ($detail->jumlah_keluar ?? 0));
                     })
                     ->money('IDR'),
 
@@ -65,8 +66,8 @@ class ProgresTokoResource extends Resource
                         $year = $livewire->tableFilters['tahun']['value'] ?? null;
 
                         $transactions = $record->transaksiProdukFix()
-                            ->when($month, fn($q) => $q->whereMonth('created_at', $month))
-                            ->when($year, fn($q) => $q->whereYear('created_at', $year))
+                            ->when($month, fn ($q) => $q->whereMonth('created_at', $month))
+                            ->when($year, fn ($q) => $q->whereYear('created_at', $year))
                             ->with('details')
                             ->get();
 
@@ -81,15 +82,15 @@ class ProgresTokoResource extends Resource
                         $year = $livewire->tableFilters['tahun']['value'] ?? null;
 
                         $transactions = $record->transaksiProdukFix()
-                            ->when($month, fn($q) => $q->whereMonth('created_at', $month))
-                            ->when($year, fn($q) => $q->whereYear('created_at', $year))
+                            ->when($month, fn ($q) => $q->whereMonth('created_at', $month))
+                            ->when($year, fn ($q) => $q->whereYear('created_at', $year))
                             ->with('details')
                             ->get();
 
                         $details = $transactions->flatMap->details;
 
-                        $totalJual = $details->sum(fn($d) => ($d->harga_jual ?? 0) * ($d->jumlah_keluar ?? 0));
-                        $totalModal = $details->sum(fn($d) => ($d->harga_modal ?? 0) * ($d->jumlah_keluar ?? 0));
+                        $totalJual = $details->sum(fn ($d) => ($d->harga_jual ?? 0) * ($d->jumlah_keluar ?? 0));
+                        $totalModal = $details->sum(fn ($d) => ($d->harga_modal ?? 0) * ($d->jumlah_keluar ?? 0));
 
                         return $totalJual - $totalModal;
                     })
@@ -100,6 +101,7 @@ class ProgresTokoResource extends Resource
                     ->label('Filter Tahun')
                     ->options(function () {
                         $years = range(now()->year, now()->year - 5);
+
                         return array_combine($years, $years);
                     })
                     ->placeholder('Semua Tahun')

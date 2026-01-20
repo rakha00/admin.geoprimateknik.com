@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
-
 class Gudang extends Model
 {
     use HasFactory;
+
     protected $fillable = ['nama', 'no_hp', 'alamat', 'gaji_pokok', 'status', 'terakhir_aktif'];
 
     public function penghasilanDetails()
@@ -23,8 +23,8 @@ class Gudang extends Model
             ->filter(function ($detail) use ($bulan, $tahun) {
                 $tanggal = $detail->tanggal ? Carbon::parse($detail->tanggal) : null;
 
-                return (!$bulan || ($tanggal && $tanggal->month == $bulan))
-                    && (!$tahun || ($tanggal && $tanggal->year == $tahun));
+                return (! $bulan || ($tanggal && $tanggal->month == $bulan))
+                    && (! $tahun || ($tanggal && $tanggal->year == $tahun));
             })
             ->sum($field);
     }

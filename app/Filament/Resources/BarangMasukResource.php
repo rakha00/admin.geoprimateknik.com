@@ -18,9 +18,13 @@ class BarangMasukResource extends Resource
     protected static ?string $model = BarangMasuk::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-down-on-square-stack';
+
     protected static ?string $navigationLabel = 'Barang Masuk';
+
     protected static ?string $navigationGroup = 'Inventori';
+
     protected static ?string $pluralModelLabel = 'Barang Masuk';
+
     protected static ?int $navigationSort = 1;
 
     public static function canViewAny(): bool
@@ -44,7 +48,7 @@ class BarangMasukResource extends Resource
                     ->required()
                     ->reactive()
                     ->afterStateUpdated(function ($state, $get, $set) {
-                        if (!$state) {
+                        if (! $state) {
                             return;
                         }
                         $d = Carbon::parse($state)->format('dmY');
@@ -74,6 +78,7 @@ class BarangMasukResource extends Resource
         $d = Carbon::parse($data['tanggal'])->format('dmY');
         $count = BarangMasuk::whereDate('tanggal', $data['tanggal'])->count() + 1;
         $data['nomor_barang_masuk'] = "BM/{$d}-{$count}";
+
         return $data;
     }
 
@@ -86,6 +91,7 @@ class BarangMasukResource extends Resource
                 ->count() + 1;
             $data['nomor_barang_masuk'] = "BM/{$d}-{$count}";
         }
+
         return $data;
     }
 
@@ -129,10 +135,9 @@ class BarangMasukResource extends Resource
                     ])
                     ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data): \Illuminate\Database\Eloquent\Builder {
                         return $query
-                            ->when($data['from'], fn($q, $from) => $q->whereDate('tanggal', '>=', $from))
-                            ->when($data['until'], fn($q, $until) => $q->whereDate('tanggal', '<=', $until));
+                            ->when($data['from'], fn ($q, $from) => $q->whereDate('tanggal', '>=', $from))
+                            ->when($data['until'], fn ($q, $until) => $q->whereDate('tanggal', '<=', $until));
                     }),
-
 
             ])
             ->actions([
@@ -160,7 +165,6 @@ class BarangMasukResource extends Resource
                         );
                     }),
             ])
-
 
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),

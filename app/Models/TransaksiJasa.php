@@ -73,4 +73,3 @@ class TransaksiJasa extends Model
         return $this->hasOne(\App\Models\Piutang::class);
     }
 }
-

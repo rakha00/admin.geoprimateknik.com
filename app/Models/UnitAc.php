@@ -14,7 +14,7 @@ class UnitAc extends Model
     {
         static::saved(function ($unit) {
             // Avoid infinite loop since recalculateStock uses updateQuietly
-            // But we should be careful. 
+            // But we should be careful.
             // recalculateStock updates 'stok_keluar' and 'stok_akhir'.
             // If we are saving those, we don't need to recalculate?
             // Actually, if we change stock_awal, we need to recalculate.

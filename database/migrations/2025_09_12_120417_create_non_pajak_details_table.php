@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('non_pajak_id')
                 ->constrained('non_pajaks')
                 ->onDelete('cascade');
-            
+
             // data detail
             $table->string('sku')->nullable();
             $table->string('nama_unit')->nullable();

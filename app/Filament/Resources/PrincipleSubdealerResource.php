@@ -15,10 +15,15 @@ class PrincipleSubdealerResource extends Resource
     protected static ?string $model = PrincipleSubdealer::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
+
     protected static ?string $navigationLabel = 'Principle / Subdealer';
+
     protected static ?string $navigationGroup = 'Master Data';
+
     protected static ?string $pluralModelLabel = 'Principle / Subdealer';
+
     protected static ?int $navigationSort = 3;
+
     protected static ?string $recordTitleAttribute = 'nama';
 
     public static function canViewAny(): bool

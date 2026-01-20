@@ -93,12 +93,14 @@ class BarangMasukDetail extends Model
     protected function syncUtang()
     {
         $barangMasuk = $this->barangMasuk;
-        if (!$barangMasuk)
+        if (! $barangMasuk) {
             return;
+        }
 
         $totalHargaModal = $barangMasuk->barangMasukDetails->sum(function ($d) {
             $harga = $d->harga_modal ?? 0;
             $jumlah = $d->jumlah_barang_masuk ?? 0;
+
             return $harga * $jumlah;
         });
 

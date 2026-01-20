@@ -5,24 +5,29 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\StaffResource\Pages;
 use App\Filament\Resources\StaffResource\RelationManagers;
 use App\Models\Staff;
-use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Forms\Components\{TextInput, Textarea, DatePicker};
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Table;
 use Illuminate\Support\Carbon;
 
 class StaffResource extends Resource
 {
     protected static ?string $model = Staff::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-user';
+
     protected static ?string $navigationLabel = 'Staff';
+
     protected static ?string $pluralModelLabel = 'Staff';
+
     protected static ?string $navigationGroup = 'Karyawan';
+
     protected static ?int $navigationSort = 4;
 
     public static function canViewAny(): bool
@@ -67,32 +72,32 @@ class StaffResource extends Resource
                 TextColumn::make('no_hp'),
                 TextColumn::make('status')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'aktif' => 'success',
                         'tidak aktif' => 'danger',
                     }),
 
                 TextColumn::make('gaji_pokok')
                     ->money('IDR', divideBy: 1, locale: 'id')
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 // === Lembur ===
                 TextColumn::make('lembur')
                     ->label('Lembur')
-                    ->state(fn($record, $livewire) => self::sumDetailFiltered($record, 'lembur', $livewire))
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->state(fn ($record, $livewire) => self::sumDetailFiltered($record, 'lembur', $livewire))
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 // === Bonus ===
                 TextColumn::make('bonus')
                     ->label('Bonus')
-                    ->state(fn($record, $livewire) => self::sumDetailFiltered($record, 'bonus', $livewire))
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->state(fn ($record, $livewire) => self::sumDetailFiltered($record, 'bonus', $livewire))
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 // === Kasbon ===
                 TextColumn::make('kasbon')
                     ->label('Kasbon')
-                    ->state(fn($record, $livewire) => self::sumDetailFiltered($record, 'kasbon', $livewire))
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->state(fn ($record, $livewire) => self::sumDetailFiltered($record, 'kasbon', $livewire))
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 // === Total Gaji ===
                 TextColumn::make('total_gaji')
@@ -100,9 +105,10 @@ class StaffResource extends Resource
                     ->state(function ($record, $livewire) {
                         $lembur = self::sumDetailFiltered($record, 'lembur', $livewire);
                         $bonus = self::sumDetailFiltered($record, 'bonus', $livewire);
+
                         return $record->gaji_pokok + $lembur + $bonus;
                     })
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 // === Gaji Diterima ===
                 TextColumn::make('gaji_diterima')
@@ -111,9 +117,10 @@ class StaffResource extends Resource
                         $lembur = self::sumDetailFiltered($record, 'lembur', $livewire);
                         $bonus = self::sumDetailFiltered($record, 'bonus', $livewire);
                         $kasbon = self::sumDetailFiltered($record, 'kasbon', $livewire);
+
                         return $record->gaji_pokok + $lembur + $bonus - $kasbon;
                     })
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
 
                 TextColumn::make('terakhir_aktif')->date(),
             ])
@@ -167,9 +174,9 @@ class StaffResource extends Resource
             ->filter(function ($detail) use ($bulan, $from, $until) {
                 $tanggal = $detail->tanggal ? Carbon::parse($detail->tanggal) : null;
 
-                return (!$bulan || ($tanggal && $tanggal->month == $bulan))
-                    && (!$from || ($tanggal && $tanggal->gte(Carbon::parse($from))))
-                    && (!$until || ($tanggal && $tanggal->lte(Carbon::parse($until))));
+                return (! $bulan || ($tanggal && $tanggal->month == $bulan))
+                    && (! $from || ($tanggal && $tanggal->gte(Carbon::parse($from))))
+                    && (! $until || ($tanggal && $tanggal->lte(Carbon::parse($until))));
             })
             ->sum($field);
     }

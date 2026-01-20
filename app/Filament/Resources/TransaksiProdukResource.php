@@ -7,37 +7,41 @@ use App\Filament\Resources\TransaksiProdukResource\Pages\EditTransaksiProduk;
 use App\Filament\Resources\TransaksiProdukResource\Pages\ListTransaksiProduks;
 use App\Filament\Resources\TransaksiProdukResource\RelationManagers\TransaksiProdukDetailsRelationManager;
 use App\Models\TransaksiProduk;
-use Illuminate\Support\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Support\Carbon;
 
 class TransaksiProdukResource extends Resource
 {
     protected static ?string $model = TransaksiProduk::class;
-    protected static ?string $navigationIcon  = 'heroicon-o-shopping-cart';
+
+    protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
+
     protected static ?string $navigationLabel = 'Transaksi Produk';
+
     protected static ?string $navigationGroup = 'Transaksi';
+
     protected static ?string $recordTitleAttribute = 'no_invoice';
 
-public static function canViewAny(): bool
-{
-    return auth()->user()->level == 1;
-}
-   
-public static function shouldRegisterNavigation(): bool
-{
-    return false;
-}
-   public static function form(Form $form): Form
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->level == 1;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
+    public static function form(Form $form): Form
     {
         return $form
             ->schema([
@@ -46,27 +50,29 @@ public static function shouldRegisterNavigation(): bool
                     ->required()
                     ->reactive()
                     ->afterStateUpdated(function ($state, $get, $set) {
-                        if (! $state) return;
-                   
+                        if (! $state) {
+                            return;
+                        }
+
                         $tanggal = Carbon::parse($state);
-                        $d       = $tanggal->format('dmY');
-                   
+                        $d = $tanggal->format('dmY');
+
                         $lastNumber = TransaksiProduk::whereDate('tanggal', $tanggal)
-                        ->get()
-                        ->map(function ($item) {
-                            if (preg_match('/-(\d+)$/', $item->no_invoice, $matches)) {
-                                return (int) $matches[1];
-                            }
-                            return 0;
-                        })
-                        ->max();
-                   
+                            ->get()
+                            ->map(function ($item) {
+                                if (preg_match('/-(\d+)$/', $item->no_invoice, $matches)) {
+                                    return (int) $matches[1];
+                                }
+
+                                return 0;
+                            })
+                            ->max();
+
                         $newNumber = $lastNumber + 1;
-                   
-                        $set('no_invoice',     "INV/{$d}-{$newNumber}");
+
+                        $set('no_invoice', "INV/{$d}-{$newNumber}");
                         $set('no_surat_jalan', "SJ/{$d}-{$newNumber}");
                     }),
-                   
 
                 TextInput::make('no_invoice')
                     ->label('No Invoice')
@@ -103,8 +109,8 @@ public static function shouldRegisterNavigation(): bool
     public static function mutateFormDataBeforeCreate(array $data): array
     {
         $tanggal = Carbon::parse($data['tanggal']);
-        $d       = $tanggal->format('dmY');
-   
+        $d = $tanggal->format('dmY');
+
         // Ambil semua nomor invoice pada tanggal tsb, lalu cari angka terbesar
         $lastNumber = TransaksiProduk::whereDate('tanggal', $tanggal)
             ->get()
@@ -112,18 +118,18 @@ public static function shouldRegisterNavigation(): bool
                 if (preg_match('/-(\d+)$/', $item->no_invoice, $matches)) {
                     return (int) $matches[1];
                 }
+
                 return 0;
             })
             ->max();
-   
+
         $newNumber = $lastNumber + 1;
-   
-        $data['no_invoice']     = "INV/{$d}-{$newNumber}";
+
+        $data['no_invoice'] = "INV/{$d}-{$newNumber}";
         $data['no_surat_jalan'] = "SJ/{$d}-{$newNumber}";
-   
+
         return $data;
     }
-   
 
     /**
      * Jika edit dan tanggal berubah, regen nomor.
@@ -133,9 +139,9 @@ public static function shouldRegisterNavigation(): bool
         if (isset($data['tanggal'])) {
             $d = Carbon::parse($data['tanggal'])->format('dmY');
             $count = TransaksiProduk::whereDate('tanggal', $data['tanggal'])
-                        ->where('id', '!=', $record->id)
-                        ->count() + 1;
-            $data['no_invoice']     = "INV/{$d}-{$count}";
+                ->where('id', '!=', $record->id)
+                ->count() + 1;
+            $data['no_invoice'] = "INV/{$d}-{$count}";
             $data['no_surat_jalan'] = "SJ/{$d}-{$count}";
         }
 
@@ -151,40 +157,36 @@ public static function shouldRegisterNavigation(): bool
                 TextColumn::make('tanggal')->label('Tanggal')->date()->sortable(),
                 TextColumn::make('sales.nama')->label('Sales')->sortable()->searchable(),
                 TextColumn::make('toko.nama_konsumen')->label('Toko/Konsumen')->sortable(),
-               
+
                 // FIXED: IKUTIN CARA PIUTANG - HANYA PERHITUNGAN MANUAL
                 TextColumn::make('total_harga_jual')
                     ->label('Total Harga Jual')
-                    ->getStateUsing(fn (TransaksiProduk $record): int =>
-                        $record->details->sum(function ($detail) {
-                            // SAMA SEPERTI DI PIUTANG: hanya perhitungan manual
-                            return $detail->harga_jual * $detail->jumlah_keluar;
-                        })
+                    ->getStateUsing(fn (TransaksiProduk $record): int => $record->details->sum(function ($detail) {
+                        // SAMA SEPERTI DI PIUTANG: hanya perhitungan manual
+                        return $detail->harga_jual * $detail->jumlah_keluar;
+                    })
                     )
-                    ->formatStateUsing(fn (int $state): string =>
-                        number_format($state, 0, ',', '.')
+                    ->formatStateUsing(fn (int $state): string => number_format($state, 0, ',', '.')
                     ),
-               
+
                 // FIXED: IKUTIN CARA PIUTANG - HANYA PERHITUNGAN MANUAL
                 TextColumn::make('total_keuntungan')
                     ->label('Total Keuntungan')
-                    ->getStateUsing(fn (TransaksiProduk $record): int =>
-                        $record->details->sum(function ($detail) {
-                            // Hitung total jual manual
-                            $totalJual = $detail->harga_jual * $detail->jumlah_keluar;
-                           
-                            // Hitung total modal manual
-                            $totalModal = $detail->harga_modal * $detail->jumlah_keluar;
-                           
-                            return $totalJual - $totalModal;
-                        })
+                    ->getStateUsing(fn (TransaksiProduk $record): int => $record->details->sum(function ($detail) {
+                        // Hitung total jual manual
+                        $totalJual = $detail->harga_jual * $detail->jumlah_keluar;
+
+                        // Hitung total modal manual
+                        $totalModal = $detail->harga_modal * $detail->jumlah_keluar;
+
+                        return $totalJual - $totalModal;
+                    })
                     )
-                    ->formatStateUsing(fn (int $state): string =>
-                        number_format($state, 0, ',', '.')
+                    ->formatStateUsing(fn (int $state): string => number_format($state, 0, ',', '.')
                     ),
             ])
             ->filters([
-                    \Filament\Tables\Filters\Filter::make('rentang_tanggal')
+                \Filament\Tables\Filters\Filter::make('rentang_tanggal')
                     ->label('Rentang Tanggal')
                     ->form([
                         \Filament\Forms\Components\DatePicker::make('from')->label('Dari'),
@@ -192,15 +194,14 @@ public static function shouldRegisterNavigation(): bool
                     ])
                     ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data): \Illuminate\Database\Eloquent\Builder {
                         return $query
-                            ->when($data['from'], fn($q, $from) => $q->whereDate('tanggal', '>=', $from))
-                            ->when($data['until'], fn($q, $until) => $q->whereDate('tanggal', '<=', $until));
+                            ->when($data['from'], fn ($q, $from) => $q->whereDate('tanggal', '>=', $from))
+                            ->when($data['until'], fn ($q, $until) => $q->whereDate('tanggal', '<=', $until));
                     }),
 
-                    
             ])
             ->actions([
                 EditAction::make(),
-   
+
                 Action::make('download')
                     ->label('Download')
                     ->icon('heroicon-o-arrow-down-tray')
@@ -211,19 +212,19 @@ public static function shouldRegisterNavigation(): bool
                                 // 'surat_jalan_sjt'  => 'Surat Jalan SJT',
                                 'surat_jalan_apjt' => 'Surat Jalan APJT',
                                 // 'invoice_sjt'      => 'Invoice SJT',
-                                'invoice_apjt'     => 'Invoice APJT',
+                                'invoice_apjt' => 'Invoice APJT',
                             ])
                             ->required(),
                     ])
-                    ->action(fn(TransaksiProduk $record, array $data) => redirect()->to(
-                        route(match($data['type']) {
-                            'surat_jalan_sjt'  => 'transaksi-produk.surat-jalan.sjt',
+                    ->action(fn (TransaksiProduk $record, array $data) => redirect()->to(
+                        route(match ($data['type']) {
+                            'surat_jalan_sjt' => 'transaksi-produk.surat-jalan.sjt',
                             'surat_jalan_apjt' => 'transaksi-produk.surat-jalan.apjt',
-                            'invoice_sjt'      => 'transaksi-produk.invoice.sjt',
-                            'invoice_apjt'     => 'transaksi-produk.invoice.apjt',
+                            'invoice_sjt' => 'transaksi-produk.invoice.sjt',
+                            'invoice_apjt' => 'transaksi-produk.invoice.apjt',
                         }, $record)
                     )),
-                    \Filament\Tables\Actions\Action::make('export_excel')
+                \Filament\Tables\Actions\Action::make('export_excel')
                     ->label('Download Excel')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function () {
@@ -231,7 +232,7 @@ public static function shouldRegisterNavigation(): bool
                             new \App\Exports\TransaksiJasaExport, // export class nanti kita bikin
                             'transaksi_jasa.xlsx'
                         );
-                    }),      
+                    }),
             ])
             ->headerActions([
                 \Filament\Tables\Actions\Action::make('Export Excel')
@@ -240,7 +241,7 @@ public static function shouldRegisterNavigation(): bool
                     ->requiresConfirmation()
                     ->action(function ($action, $livewire) {
                         $filters = $livewire->tableFilters ?? [];
-            
+
                         return \Maatwebsite\Excel\Facades\Excel::download(
                             new \App\Exports\TransaksiProdukExport([
                                 'bulan' => $filters['bulan']['value'] ?? null,
@@ -251,7 +252,7 @@ public static function shouldRegisterNavigation(): bool
                         );
                     }),
             ])
-            
+
             ->bulkActions([DeleteBulkAction::make()]);
     }
 
@@ -265,9 +266,9 @@ public static function shouldRegisterNavigation(): bool
     public static function getPages(): array
     {
         return [
-            'index'  => ListTransaksiProduks::route('/'),
+            'index' => ListTransaksiProduks::route('/'),
             'create' => CreateTransaksiProduk::route('/create'),
-            'edit'   => EditTransaksiProduk::route('/{record}/edit'),
+            'edit' => EditTransaksiProduk::route('/{record}/edit'),
         ];
     }
 }

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('gaji_pokok', 15, 2);
             $table->timestamps();
         });
-        
+
     }
 
     /**

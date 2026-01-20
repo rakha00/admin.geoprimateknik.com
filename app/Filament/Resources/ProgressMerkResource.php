@@ -2,11 +2,10 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ProgressMerkResource\Pages;
 use App\Models\TransaksiProdukDetail;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 class ProgressMerkResource extends Resource
@@ -15,19 +14,25 @@ class ProgressMerkResource extends Resource
     protected static ?string $model = TransaksiProdukDetail::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';
+
     protected static ?string $navigationLabel = 'Progres Merk';
+
     protected static ?string $navigationGroup = 'Laporan';
+
     protected static ?string $pluralModelLabel = 'Progres Merk';
+
     protected static ?int $navigationSort = 3;
 
     public static function canCreate(): bool
     {
         return false;
     }
+
     public static function canEdit($record): bool
     {
         return false;
     }
+
     public static function canDelete($record): bool
     {
         return false;
@@ -45,7 +50,7 @@ class ProgressMerkResource extends Resource
                 TextColumn::make('nama_unit')
                     ->label('Merk (Nama Unit)')
                     ->searchable()
-                    ->getStateUsing(fn($record) => $record->unitAc->nama_unit ?? 'N/A'),
+                    ->getStateUsing(fn ($record) => $record->unitAc->nama_unit ?? 'N/A'),
 
                 TextColumn::make('total_terjual')
                     ->label('Total Terjual')
@@ -85,7 +90,6 @@ class ProgressMerkResource extends Resource
                         return $query;
                     }),
             ])
-
 
             ->query(function () {
                 // Ambil satu record per nama_unit (yang pertama untuk setiap merk)

@@ -3,26 +3,29 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\KonsumenJasaResource\Pages;
-use App\Filament\Resources\KonsumenJasaResource\RelationManagers;
 use App\Models\KonsumenJasa;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class KonsumenJasaResource extends Resource
 {
     protected static ?string $model = KonsumenJasa::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
+
     protected static ?string $navigationLabel = 'Konsumen Jasa';
+
     protected static ?string $navigationGroup = 'Master Data';
+
     protected static ?string $pluralModelLabel = 'Konsumen Jasa';
+
     protected static ?int $navigationSort = 1;
+
     protected static ?string $pluralLabel = 'Konsumen Jasa';
+
     protected static ?string $modelLabel = 'Konsumen Jasa';
 
     public static function form(Form $form): Form

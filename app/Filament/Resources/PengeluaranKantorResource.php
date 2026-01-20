@@ -3,24 +3,25 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PengeluaranKantorResource\Pages;
-use App\Filament\Resources\PengeluaranKantorResource\RelationManagers;
 use App\Models\PengeluaranKantor;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PengeluaranKantorResource extends Resource
 {
     protected static ?string $model = PengeluaranKantor::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-calculator';
+
     protected static ?string $navigationGroup = 'Keuangan';
+
     protected static ?string $navigationLabel = 'Pengeluaran Kantor';
+
     protected static ?string $pluralModelLabel = 'Pengeluaran Kantor';
+
     protected static ?int $navigationSort = 4;
 
     public static function canViewAny(): bool
@@ -78,10 +79,9 @@ class PengeluaranKantorResource extends Resource
                     ])
                     ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data): \Illuminate\Database\Eloquent\Builder {
                         return $query
-                            ->when($data['from'], fn($q, $from) => $q->whereDate('tanggal', '>=', $from))
-                            ->when($data['until'], fn($q, $until) => $q->whereDate('tanggal', '<=', $until));
+                            ->when($data['from'], fn ($q, $from) => $q->whereDate('tanggal', '>=', $from))
+                            ->when($data['until'], fn ($q, $until) => $q->whereDate('tanggal', '<=', $until));
                     }),
-
 
             ])
             ->actions([

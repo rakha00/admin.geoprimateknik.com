@@ -5,10 +5,10 @@ namespace App\Exports;
 use App\Models\Staff;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class StaffGajiExport implements FromCollection, WithHeadings, ShouldAutoSize
+class StaffGajiExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
     protected $filters;
 

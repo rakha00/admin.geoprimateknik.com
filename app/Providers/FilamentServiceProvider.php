@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
-use Filament\PluginServiceProvider;
+use App\Filament\Resources\TeknisiResource;
 use App\Filament\Resources\TransaksiJasaResource;
 use App\Filament\Resources\TransaksiProdukResource;
-use App\Filament\Resources\TeknisiResource;
+use Filament\PluginServiceProvider;
 
 class FilamentServiceProvider extends PluginServiceProvider
 {

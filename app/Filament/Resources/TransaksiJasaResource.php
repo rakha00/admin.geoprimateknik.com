@@ -4,31 +4,34 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TransaksiJasaResource\Pages;
 use App\Models\TransaksiJasa;
-use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Carbon;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 class TransaksiJasaResource extends Resource
 {
     protected static ?string $model = TransaksiJasa::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
+
     protected static ?string $navigationGroup = 'Transaksi';
+
     protected static ?string $navigationLabel = 'Transaksi Jasa';
+
     protected static ?string $pluralModelLabel = 'Transaksi Jasa';
+
     protected static ?int $navigationSort = 1;
+
     protected static ?string $recordTitleAttribute = 'no_invoice';
 
     public static function form(Form $form): Form
@@ -40,8 +43,9 @@ class TransaksiJasaResource extends Resource
                     ->required() // User said nullable fields but usually date is required for invoice gen. User said "biarkan semua nullable". I will make it nullable but logic needs date. If null, maybe no invoice num?
                     ->reactive()
                     ->afterStateUpdated(function ($state, $get, $set) {
-                        if (!$state)
+                        if (! $state) {
                             return;
+                        }
                         $codes = self::generateCode($state);
                         $set('no_invoice', $codes['invoice']);
                         $set('no_surat_jalan', $codes['surat_jalan']);
@@ -80,14 +84,14 @@ class TransaksiJasaResource extends Resource
                     ->numeric()
                     ->prefix('Rp')
                     ->live(true)
-                    ->afterStateUpdated(fn($state, $get, $set) => $set('total_keuntungan_jasa', ($state ?? 0) - ($get('total_pengeluaran_jasa') ?? 0))),
+                    ->afterStateUpdated(fn ($state, $get, $set) => $set('total_keuntungan_jasa', ($state ?? 0) - ($get('total_pengeluaran_jasa') ?? 0))),
 
                 TextInput::make('total_pengeluaran_jasa')
                     ->label('Total Pengeluaran Jasa')
                     ->numeric()
                     ->prefix('Rp')
                     ->live(true)
-                    ->afterStateUpdated(fn($state, $get, $set) => $set('total_keuntungan_jasa', ($get('total_pendapatan_jasa') ?? 0) - ($state ?? 0))),
+                    ->afterStateUpdated(fn ($state, $get, $set) => $set('total_keuntungan_jasa', ($get('total_pendapatan_jasa') ?? 0) - ($state ?? 0))),
 
                 TextInput::make('total_keuntungan_jasa')
                     ->label('Total Keuntungan Jasa')
@@ -124,13 +128,13 @@ class TransaksiJasaResource extends Resource
                         return $query
                             ->when(
                                 $data['from'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('tanggal_transaksi', '>=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('tanggal_transaksi', '>=', $date),
                             )
                             ->when(
                                 $data['until'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('tanggal_transaksi', '<=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('tanggal_transaksi', '<=', $date),
                             );
-                    })
+                    }),
             ])
             ->actions([
                 EditAction::make(),
@@ -146,7 +150,7 @@ class TransaksiJasaResource extends Resource
                             ])
                             ->required(),
                     ])
-                    ->action(fn(TransaksiJasa $record, array $data) => redirect()->to(
+                    ->action(fn (TransaksiJasa $record, array $data) => redirect()->to(
                         route(match ($data['type']) {
                             'invoice' => 'transaksi-jasa.print.invoice',
                             'surat_jalan' => 'transaksi-jasa.print.surat-jalan',
@@ -181,11 +185,14 @@ class TransaksiJasaResource extends Resource
         if (isset($data['tanggal_transaksi'])) {
             $codes = self::generateCode($data['tanggal_transaksi']);
             // Only set if not already set or empty (frontend should handle this, but for safety)
-            if (empty($data['no_invoice']))
+            if (empty($data['no_invoice'])) {
                 $data['no_invoice'] = $codes['invoice'];
-            if (empty($data['no_surat_jalan']))
+            }
+            if (empty($data['no_surat_jalan'])) {
                 $data['no_surat_jalan'] = $codes['surat_jalan'];
+            }
         }
+
         return $data;
     }
 
@@ -210,8 +217,9 @@ class TransaksiJasaResource extends Resource
             9 => 'IX',
             10 => 'X',
             11 => 'XI',
-            12 => 'XII'
+            12 => 'XII',
         ];
+
         return $map[$month] ?? '';
     }
 
@@ -233,6 +241,7 @@ class TransaksiJasaResource extends Resource
                 if (preg_match("/^GTP-JASAINV\/{$yy}\/[IVX]+\/(\d+)$/", $item->no_invoice, $matches)) {
                     return (int) $matches[1];
                 }
+
                 return 0;
             })
             ->max();

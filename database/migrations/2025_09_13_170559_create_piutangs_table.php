@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('piutangs', function (Blueprint $table) {
@@ -16,7 +17,7 @@ return new class extends Migration {
             $table->date('due_date')->nullable();
             $table->text('keterangan')->nullable();
             $table->enum('status_pembayaran', ['belum lunas', 'tercicil', 'sudah lunas'])
-                  ->default('belum lunas');
+                ->default('belum lunas');
             $table->json('fotos')->nullable();
             // Saldo sudah dibayar
             $table->decimal('sudah_dibayar', 15, 2)->default(0);

@@ -6,18 +6,22 @@ use App\Filament\Resources\SparepartResource\Pages;
 use App\Models\Sparepart;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Resources\Resource;
 
 class SparepartResource extends Resource
 {
     protected static ?string $model = Sparepart::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-cog';
+
     protected static ?string $navigationLabel = 'Sparepart';
+
     protected static ?string $navigationGroup = 'Inventori';
+
     protected static ?string $pluralModelLabel = 'Sparepart';
+
     protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
