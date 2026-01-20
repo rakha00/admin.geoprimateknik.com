@@ -51,7 +51,7 @@ class NonPajakResource extends Resource
                 ->required()
                 ->reactive()
                 ->afterStateUpdated(function ($state, $get, $set) {
-                    if (!$state) {
+                    if (! $state) {
                         return;
                     }
 
@@ -199,7 +199,7 @@ class NonPajakResource extends Resource
                 TextColumn::make('pembayaran')->label('Pembayaran'),
                 TextColumn::make('status')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'Selesai' => 'success',
                         'Belum Selesai' => 'warning',
                     }),
@@ -210,18 +210,18 @@ class NonPajakResource extends Resource
                 TextColumn::make('total_harga_jual')
                     ->label('Total Harga Jual')
                     ->getStateUsing(
-                        fn(NonPajak $record): int => $record->details->sum(function ($detail) {
+                        fn (NonPajak $record): int => $record->details->sum(function ($detail) {
                             return ($detail->harga_jual ?? 0) * ($detail->jumlah_keluar ?? 0);
                         })
                     )
                     ->formatStateUsing(
-                        fn(int $state): string => number_format($state, 0, ',', '.')
+                        fn (int $state): string => number_format($state, 0, ',', '.')
                     ),
 
                 TextColumn::make('total_keuntungan')
                     ->label('Total Keuntungan')
                     ->getStateUsing(
-                        fn(NonPajak $record): int => $record->details->sum(function ($detail) {
+                        fn (NonPajak $record): int => $record->details->sum(function ($detail) {
                             $totalJual = ($detail->harga_jual ?? 0) * ($detail->jumlah_keluar ?? 0);
                             $totalModal = ($detail->harga_modal ?? 0) * ($detail->jumlah_keluar ?? 0);
 
@@ -229,7 +229,7 @@ class NonPajakResource extends Resource
                         })
                     )
                     ->formatStateUsing(
-                        fn(int $state): string => number_format($state, 0, ',', '.')
+                        fn (int $state): string => number_format($state, 0, ',', '.')
                     ),
             ])
             ->actions([
@@ -238,8 +238,8 @@ class NonPajakResource extends Resource
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn(NonPajak $record) => $record->status === 'Belum Selesai')
-                    ->action(fn(NonPajak $record) => $record->update(['status' => 'Selesai'])),
+                    ->visible(fn (NonPajak $record) => $record->status === 'Belum Selesai')
+                    ->action(fn (NonPajak $record) => $record->update(['status' => 'Selesai'])),
 
                 Action::make('download')
                     ->label('Download')
@@ -256,7 +256,7 @@ class NonPajakResource extends Resource
                             ])
                             ->required(),
                     ])
-                    ->action(fn(NonPajak $record, array $data) => redirect()->to(
+                    ->action(fn (NonPajak $record, array $data) => redirect()->to(
                         route(match ($data['type']) {
                             'surat_jalan_sjt' => 'transaksi-produk.surat-jalan.sjt',
                             'surat_jalan_apjt' => 'transaksi-produk.surat-jalan.apjt',
@@ -277,8 +277,8 @@ class NonPajakResource extends Resource
                     ])
                     ->query(function ($query, array $data) {
                         return $query
-                            ->when($data['from'], fn($q, $from) => $q->whereDate('tanggal', '>=', $from))
-                            ->when($data['until'], fn($q, $until) => $q->whereDate('tanggal', '<=', $until));
+                            ->when($data['from'], fn ($q, $from) => $q->whereDate('tanggal', '>=', $from))
+                            ->when($data['until'], fn ($q, $until) => $q->whereDate('tanggal', '<=', $until));
                     }),
             ]);
     }

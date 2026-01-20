@@ -20,6 +20,13 @@ class Sparepart extends Model
         'stok_akhir',
     ];
 
+    protected static function booted()
+    {
+        static::saving(function ($model) {
+            $model->stok_akhir = ($model->stock_awal ?? 0) + ($model->stok_masuk ?? 0) - ($model->stok_keluar ?? 0);
+        });
+    }
+
     public function recalculateStock()
     {
         $stokMasuk = $this->stok_masuk; // Assuming this is managed elsewhere or static for now
