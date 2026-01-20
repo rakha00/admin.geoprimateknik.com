@@ -19,7 +19,7 @@ class TeknisiResource extends Resource
 {
     protected static ?string $model = Teknisi::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
+    protected static ?string $navigationIcon = 'heroicon-o-user';
 
     protected static ?string $navigationLabel = 'Teknisi';
 
@@ -27,7 +27,7 @@ class TeknisiResource extends Resource
 
     protected static ?string $navigationGroup = 'Karyawan';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $slug = 'teknisi';
 
@@ -71,14 +71,14 @@ class TeknisiResource extends Resource
                 TextColumn::make('no_hp'),
                 TextColumn::make('status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'aktif' => 'success',
                         'tidak aktif' => 'danger',
                     }),
 
                 TextColumn::make('gaji_pokok')
                     ->money('IDR', divideBy: 1, locale: 'id')
-                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 TextColumn::make('lembur')
                     ->label('Lembur')
@@ -88,7 +88,7 @@ class TeknisiResource extends Resource
 
                         return $record->sumDetail('lembur', $from, $until);
                     })
-                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 TextColumn::make('bonus')
                     ->label('Bonus')
@@ -98,7 +98,7 @@ class TeknisiResource extends Resource
 
                         return $record->sumDetail('bonus', $from, $until);
                     })
-                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 TextColumn::make('kasbon')
                     ->label('Kasbon')
@@ -108,7 +108,7 @@ class TeknisiResource extends Resource
 
                         return $record->sumDetail('kasbon', $from, $until);
                     })
-                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 TextColumn::make('total_gaji')
                     ->label('Total Gaji')
@@ -121,7 +121,7 @@ class TeknisiResource extends Resource
 
                         return $record->gaji_pokok + $lembur + $bonus;
                     })
-                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 TextColumn::make('gaji_diterima')
                     ->label('Gaji Diterima')
@@ -131,7 +131,7 @@ class TeknisiResource extends Resource
 
                         return $record->hitungGajiDiterima($from, $until);
                     })
-                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.')),
 
                 TextColumn::make('terakhir_aktif')->date(),
             ])
@@ -145,10 +145,10 @@ class TeknisiResource extends Resource
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
                         if ($data['from'] ?? null) {
-                            $indicators['from'] = 'Dari: '.Carbon::parse($data['from'])->format('d M Y');
+                            $indicators['from'] = 'Dari: ' . Carbon::parse($data['from'])->format('d M Y');
                         }
                         if ($data['until'] ?? null) {
-                            $indicators['until'] = 'Sampai: '.Carbon::parse($data['until'])->format('d M Y');
+                            $indicators['until'] = 'Sampai: ' . Carbon::parse($data['until'])->format('d M Y');
                         }
 
                         return $indicators;

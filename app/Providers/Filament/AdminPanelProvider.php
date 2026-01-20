@@ -49,9 +49,9 @@ class AdminPanelProvider extends PanelProvider
                 // FilamentInfoWidget::class,
             ])
             ->navigationGroups([
+                'Inventori',
                 'Transaksi',
                 'Keuangan',
-                'Inventori',
                 'Karyawan',
                 'Laporan',
                 'Master Data',
